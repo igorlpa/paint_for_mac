@@ -14,7 +14,7 @@ Roda no navegador: **sem instalação, sem loja e sem build.**
 - **Cores:** cor 1 no clique esquerdo e cor 2 no clique direito (ou Ctrl+clique). Inclui a paleta clássica de 28 cores.
 - **Desfazer/refazer:** até 30 passos.
 - **Área de transferência:** copiar, recortar, colar (inclusive prints do macOS) e excluir.
-- **Arquivo:** abrir imagem, salvar em PNG ou JPEG e mudar o tamanho da tela.
+- **Arquivo:** abrir imagem, salvar em PNG ou JPEG e mudar o tamanho da tela, pelo menu ou **arrastando as alças** no canto inferior direito, na borda direita ou na borda de baixo da imagem (Shift no canto mantém a proporção).
 - **Redimensionar:** escala a imagem por porcentagem ou pixels. Com "Manter proporção", basta informar uma dimensão e a outra é calculada.
 - **Exibição:** zoom de 10% a 1600%. Dá para digitar o valor, usar os botões −/+, ⌘−/⌘+/⌘0 ou a pinça do trackpad.
 

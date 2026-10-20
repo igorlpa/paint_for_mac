@@ -13,8 +13,9 @@ JavaScript puro, sem dependências e **sem ES modules**: o app abre via `file://
 | `tools/*.js` | `Paint.tools.<id>` | As ferramentas de desenho. Ver [`tools/README.md`](tools/README.md). |
 | `file.js` | `Paint.file` | Novo, abrir (`FileReader` → data: URL), salvar PNG/JPEG ("Salvar como" no Chrome, download no Safari), tamanho da tela (corta ou aumenta sem escalar), limpar, copiar/recortar/colar (clipboard do sistema + cópia interna) e a constante `MAX_SIDE` (5000 px). |
 | `resize.js` | `Paint.resize` | Diálogo "Redimensionar": escala a imagem por porcentagem ou pixels, com "Manter proporção". Um campo vazio é calculado pela proporção. Tem a opção de suavização. `scaleImage(w, h, smoothing)` faz a escala. |
+| `handles.js` | `Paint.handles` | Alças na borda da imagem (canto inferior direito, direita, baixo) para mudar o tamanho da tela arrastando. Mostra um contorno tracejado e o tamanho no status durante o arraste e aplica ao soltar (corta/aumenta sem escalar, com um passo de desfazer). Shift no canto mantém a proporção. |
 | `ui.js` | `Paint.ui` | Liga a interface ao estado: botões `data-action`/`data-tool`, paleta de 28 cores, selects, campo de zoom (−/+, digitado, pinça), atalhos de teclado, barra de status, título da janela e botões desfazer/refazer habilitados ou não. **A UI nunca desenha**; só chama ações e reage a eventos. |
-| `main.js` | — | Inicialização, nesta ordem: `ui` → `file` → `resize` → `canvas` (800×600) → histórico → lápis. Também registra o aviso de alterações não salvas ao fechar. **Deve ser sempre o último script.** |
+| `main.js` | — | Inicialização, nesta ordem: `ui` → `file` → `resize` → `canvas` (800×600) → `handles` → histórico → lápis. Também registra o aviso de alterações não salvas ao fechar. **Deve ser sempre o último script.** |
 
 ## Eventos (`Paint.on(nome, fn)`)
 
@@ -25,6 +26,7 @@ JavaScript puro, sem dependências e **sem ES modules**: o app abre via `file://
 | `'resize'` | `{ width, height }` | `canvas.setSize()` |
 | `'pointer'` | `{ x, y, ... }` ou `null` | `canvas.js`, ao mover o ponteiro sobre a imagem |
 | `'selection'` | `{ w, h }` ou `null` | `tools/select.js` |
+| `'canvas-drag'` | `{ w, h }` ou `null` | `handles.js`, durante o arraste de uma alça |
 
 ## Regras ao editar
 

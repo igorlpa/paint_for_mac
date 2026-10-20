@@ -89,6 +89,10 @@
     <div class="canvas-wrap" id="canvas-wrap">
       <canvas id="canvas"></canvas>
       <canvas id="overlay"></canvas>
+      <div class="handle handle-e" data-dir="e" title="Arraste para mudar a largura da tela"></div>
+      <div class="handle handle-s" data-dir="s" title="Arraste para mudar a altura da tela"></div>
+      <div class="handle handle-se" data-dir="se" title="Arraste para mudar o tamanho da tela (Shift mantém a proporção)"></div>
+      <div id="resize-preview" hidden></div>
     </div>
   </main>
 
@@ -139,6 +143,7 @@
   <script src="js/tools/shapes.js"></script>
   <script src="js/file.js"></script>
   <script src="js/resize.js"></script>
+  <script src="js/handles.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/main.js"></script>
 </body>

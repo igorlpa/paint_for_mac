@@ -144,6 +144,35 @@ await check('botão de ferramenta ativo', `document.querySelector('[data-tool=br
 await check('PNG gerado', `new Promise(r => Paint.canvas.el.toBlob(b => r(b.type + ':' + (b.size > 100)), 'image/png'))`, 'image/png:true');
 await check('JPEG gerado', `new Promise(r => Paint.canvas.el.toBlob(b => r(b.type), 'image/jpeg', 0.92))`, 'image/jpeg');
 
+// --- Alças de tamanho da tela (arrastar a borda/canto) ---
+await evaluate(`
+  // Arrasta a alça 'dir' por (dx, dy) pixels de TELA.
+  T.handle = (dir, dx, dy, opts = {}) => {
+    const h = document.querySelector('.handle-' + dir), r = h.getBoundingClientRect();
+    const x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const ev = (type, cx, cy) => h.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 7, button: 0,
+      shiftKey: !!opts.shift, clientX: cx, clientY: cy }));
+    ev('pointerdown', x, y); ev('pointermove', x + dx, y + dy);
+    const during = [document.getElementById('status-sel').textContent, !document.getElementById('resize-preview').hidden];
+    ev('pointerup', x + dx, y + dy);
+    return during;
+  };
+  Paint.set('zoom', 1); Paint.set('dirty', false); Paint.file.newImage();
+  Paint.canvas.ctx.fillStyle = '#ff0000'; Paint.canvas.ctx.fillRect(0, 0, 800, 600);
+  true`);
+await check('alças existem nas 3 posições', `['e','s','se'].map(d => !!document.querySelector('.handle-' + d))`, [true, true, true]);
+await check('canto: status e contorno durante o arraste', `T.handle('se', 100, 50)`, ['Nova tela: 900 × 650 px', true]);
+await check('canto: aumenta a tela e preserva o desenho', `[Paint.canvas.el.width, Paint.canvas.el.height, T.px(799,599), T.px(850,620),
+  document.getElementById('resize-preview').hidden, document.getElementById('status-sel').textContent]`, [900, 650, '#ff0000', '#ffffff', true, '']);
+await check('desfazer volta ao tamanho anterior', `Paint.history.undo(); [Paint.canvas.el.width, Paint.canvas.el.height]`, [800, 600]);
+await check('borda direita muda só a largura (corta)', `T.handle('e', -300, 80); [Paint.canvas.el.width, Paint.canvas.el.height]`, [500, 600]);
+await check('borda inferior muda só a altura', `T.handle('s', 120, -100); [Paint.canvas.el.width, Paint.canvas.el.height]`, [500, 500]);
+await check('Shift no canto mantém proporção', `T.handle('se', 250, 10, { shift: true }); [Paint.canvas.el.width, Paint.canvas.el.height]`, [750, 750]);
+await check('com zoom 200% o arraste conta em pixels da imagem', `Paint.set('zoom', 2); T.handle('se', 100, 100); [Paint.canvas.el.width, Paint.canvas.el.height]`, [800, 800]);
+await check('não fica menor que 1 px', `Paint.set('zoom', 1); T.handle('se', -5000, -5000); [Paint.canvas.el.width, Paint.canvas.el.height]`, [1, 1]);
+await check('clique sem arrastar não cria passo de desfazer', `Paint.history.clear(); T.handle('se', 0, 0); document.querySelector('[data-action=undo]').disabled`, true);
+await evaluate(`Paint.set('dirty', false); Paint.file.newImage(); true`);
+
 // --- Redimensionar (escalar) ---
 await evaluate(`
   T.val = (id, v) => { const el = document.getElementById(id); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); };

@@ -221,6 +221,9 @@ Paint.ui = (function () {
     Paint.on('selection', (s) => {
       selection.textContent = s ? `Seleção: ${s.w} × ${s.h} px` : '';
     });
+    Paint.on('canvas-drag', (s) => {
+      selection.textContent = s ? `Nova tela: ${s.w} × ${s.h} px` : '';
+    });
     Paint.on('history', ({ canUndo, canRedo }) => {
       $('[data-action="undo"]').disabled = !canUndo;
       $('[data-action="redo"]').disabled = !canRedo;

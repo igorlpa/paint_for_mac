@@ -25,6 +25,7 @@ O código de saída é `0` se tudo passou e `1` se algo falhou ou houve erro no 
 2. Abre a página e injeta helpers em `window.T`:
    - `T.drag([[x, y], ...], { button, shift })` simula um gesto com `PointerEvent` no overlay, em coordenadas da imagem;
    - `T.px(x, y)` lê a cor de um pixel;
+   - `T.handle(dir, dx, dy, { shift })` arrasta uma alça de tamanho da tela (`'e'`, `'s'`, `'se'`) em pixels de tela;
    - `T.val`, `T.unit`, `T.keep` e `T.typeZoom` preenchem campos da interface.
 3. Cada `check(nome, expressão, esperado)` avalia uma expressão na página e compara o resultado (JSON) com o esperado.
 
@@ -32,7 +33,7 @@ Os casos rodam **em sequência sobre a mesma página**, e o estado passa de um c
 
 ## Cobertura atual
 
-Lápis, pincel, borracha, cores 1 e 2, retângulo, elipse, linha a 45°, balde (inclusive sem vazar), conta-gotas, seleção (mover, copiar/colar, excluir), texto, zoom (in, out, digitado, limites, atalhos, pinça), tamanho da tela, redimensionar (%, px, campo vazio, sem proporção, limite, sem suavização), desfazer/refazer, limite de 30 passos, atalhos de teclado e geração de PNG/JPEG.
+Lápis, pincel, borracha, cores 1 e 2, retângulo, elipse, linha a 45°, balde (inclusive sem vazar), conta-gotas, seleção (mover, copiar/colar, excluir), texto, zoom (in, out, digitado, limites, atalhos, pinça), tamanho da tela (pelo menu e pelas alças de arrastar: canto, borda direita, borda inferior, Shift, zoom, mínimo de 1 px), redimensionar (%, px, campo vazio, sem proporção, limite, sem suavização), desfazer/refazer, limite de 30 passos, atalhos de teclado e geração de PNG/JPEG.
 
 **Não cobre** (testar à mão): Safari, diálogos nativos de abrir/salvar, clipboard do sistema (⌘C/⌘V reais), e se ⌘−/⌘+ deixam de dar zoom na página do navegador.
 

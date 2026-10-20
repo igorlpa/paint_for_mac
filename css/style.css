@@ -151,6 +151,37 @@ button:disabled { opacity: 0.4; cursor: default; }
   touch-action: none;
 }
 
+/* Alças de redimensionar a tela (posições e cursores como no Paint). */
+.handle {
+  position: absolute;
+  z-index: 2;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border: 1px solid #5a5a5a;
+  touch-action: none;
+}
+
+/* Área clicável maior que o quadradinho visível, para acertar fácil com o trackpad. */
+.handle::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+
+.handle-e  { right: -11px; top: calc(50% - 4px); cursor: ew-resize; }
+.handle-s  { bottom: -11px; left: calc(50% - 4px); cursor: ns-resize; }
+.handle-se { right: -11px; bottom: -11px; cursor: nwse-resize; }
+
+#resize-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  border: 1px dashed var(--text);
+  pointer-events: none;
+}
+
 .text-box {
   position: absolute;
   z-index: 1;

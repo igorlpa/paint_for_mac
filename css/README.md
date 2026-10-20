@@ -10,8 +10,9 @@
 2. **Layout da página:** `body` em coluna flex com barra superior (`.menubar`), barra de ferramentas (`.toolbar`), área de trabalho rolável (`.workspace`) e barra de status (`.statusbar`).
 3. **Controles:** botões, selects, `input[type=number]`, ferramenta ativa (`.tool.active`), seletores de cor, paleta (`.palette`, grade 14 × 2) e controle de zoom (`.zoom`, `#zoom`).
 4. **Canvas:** `.canvas-wrap` (contêiner relativo) com `#canvas` e `#overlay` empilhados. O `image-rendering` **não** fica aqui: o `js/canvas.js` define por zoom (`pixelated` a partir de 100%, suavizado abaixo disso).
-5. **Caixa de texto** (`.text-box`): a `<textarea>` transparente da ferramenta Texto. Posição e fonte são definidas pelo JS.
-6. **Diálogos** (`dialog`): janela "Redimensionar". O sufixo `%`/`px` dos campos vem de `#resize-dialog[data-unit=...] .unit-label::after`.
+5. **Alças de tamanho da tela** (`.handle-e`, `.handle-s`, `.handle-se`): quadradinhos de 8 px fora da borda da imagem. O `::before` aumenta a área clicável. `#resize-preview` é o contorno tracejado mostrado durante o arraste.
+6. **Caixa de texto** (`.text-box`): a `<textarea>` transparente da ferramenta Texto. Posição e fonte são definidas pelo JS.
+7. **Diálogos** (`dialog`): janela "Redimensionar". O sufixo `%`/`px` dos campos vem de `#resize-dialog[data-unit=...] .unit-label::after`.
 
 ## Observações
 

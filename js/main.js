@@ -4,6 +4,7 @@ Paint.ui.init();
 Paint.file.init();
 Paint.resize.init();
 Paint.canvas.init(800, 600);
+Paint.handles.init();
 Paint.history.clear();
 Paint.setTool('pencil');
 

@@ -46,6 +46,7 @@ Este arquivo registra **o que foi decidido e por quê**, para que futuras ediç�
 | 26 | **"Suavizar" ao escalar** (`imageSmoothingQuality = 'high'`), ligado por padrão e lembrado entre aberturas | É melhor para fotos. Desligado, usa vizinho mais próximo e mantém pixel art nítida. |
 | 27 | **Diálogos com `<dialog>` nativo** + `showModal()`; os atalhos globais ficam desativados enquanto há `dialog[open]` | Teclado, Esc e foco funcionam de graça. Evita `prompt()` quando há mais de um campo. |
 | 28 | **Controle de zoom digitável** (`<input type=number>` em %) + botões −/+ que pulam entre níveis fixos (`ZOOM_STEPS` em `ui.js`); atalhos ⌘−/⌘+/⌘0; pinça do trackpad (`wheel` com `ctrlKey`) | O valor digitado só é aplicado com Enter ou ao sair do campo; senão, digitar "50" passaria por 5%. Um valor inválido volta ao atual e Esc cancela. Sem interceptar a pinça, o navegador daria zoom na interface inteira. |
+| 29 | **Alças na borda da tela** (`js/handles.js`): canto inferior direito, meio da direita e meio de baixo; arrastar muda o tamanho da tela **sem escalar** (como "Tamanho da tela…") e a área nova fica branca; Shift no canto mantém a proporção | Pedido do usuário ("como no Paint"). Durante o arraste, só um contorno tracejado (`#resize-preview`) e o status (`'canvas-drag'`) mudam; a imagem é alterada uma vez ao soltar, com um passo de desfazer. Soltar sem mudar o tamanho não cria passo. O arraste é medido em pixels da imagem, descontando o zoom. |
 
 ---
 
@@ -69,6 +70,7 @@ js/tools/line.js      Linha (Bresenham; Shift = 45°)
 js/tools/shapes.js    Retângulo e elipse (Shift = quadrado/círculo)
 js/file.js            Paint.file: novo, abrir, salvar, tamanho da tela, limpar, copiar/recortar/colar; MAX_SIDE
 js/resize.js          Paint.resize: diálogo "Redimensionar" (open) e scaleImage(w, h, smoothing)
+js/handles.js         Paint.handles: alças de arrastar para mudar o tamanho da tela
 js/ui.js              Paint.ui: botões, paleta, selects, atalhos de teclado, barra de status, título
 js/main.js            Inicialização (sempre o último)
 tests/e2e.mjs         Teste automático no Chrome headless
@@ -82,6 +84,7 @@ tests/e2e.mjs         Teste automático no Chrome headless
   - `'resize'` `{width, height}`.
   - `'pointer'` `{x, y, ...}` ou `null`.
   - `'selection'` `{w, h}` ou `null`.
+  - `'canvas-drag'` `{w, h}` ou `null`: tamanho provisório enquanto uma alça é arrastada.
 - **Ponteiro** (`canvas.js`): no `pointerdown` a ferramenta ativa é capturada e recebe `onDown`/`onMove`/`onUp` até soltar. Sem botão pressionado, recebe `onHover`/`onLeave`.
 
 ---
@@ -140,7 +143,6 @@ tests/e2e.mjs         Teste automático no Chrome headless
 - Inclinar (o "Redimensionar e inclinar" do Paint).
 - Balde com tolerância ajustável.
 - Seleção de forma livre e seleção transparente (ignorar a cor 2 ao mover).
-- Arrastar as bordas da tela para redimensionar.
 - Abrir arquivo arrastando para a janela (drag-and-drop).
 - Empacotar como app `.app` com Tauri (opcional, mantendo o mesmo código web).
 
@@ -154,6 +156,7 @@ Formato: `AAAA-MM-DD — decisão — motivo`.
 - 2026-10-20 — Scripts clássicos + `window.Paint` — ES modules não funcionam em `file://`.
 - 2026-10-20 — Linha (Bresenham) e retângulo (`fillRect`) sem antialias — o `stroke()` deixava cantos cinza e halos no balde.
 - 2026-10-20 — Teste E2E com Chrome headless via CDP, sem dependências npm.
+- 2026-10-20 — Alças para mudar o tamanho da tela arrastando a borda/canto — pedido do usuário, como no Paint.
 - 2026-10-20 — README em cada pasta descrevendo os arquivos — pedido do usuário, para facilitar a navegação.
 - 2026-10-20 — Zoom de 10% a 1600%, digitável, com −/+, ⌘−/⌘+/⌘0 e pinça — pedido do usuário (zoom out e digitar o valor).
 - 2026-10-20 — Adicionado "Redimensionar…" (escala por % ou px, proporção automática, campo vazio calculado) — pedido do usuário, como no Paint.
