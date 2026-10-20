@@ -3,6 +3,8 @@
 Ferramenta simples de edição de imagem, no estilo do Paint do Windows, para o macOS.
 Roda no navegador: **sem instalação, sem loja e sem build.**
 
+![Paint para macOS: barra de ferramentas, paleta de cores e um desenho de exemplo](docs/screenshot.png)
+
 ## Como usar
 
 1. Baixe ou clone esta pasta.
@@ -37,5 +39,5 @@ Roda no navegador: **sem instalação, sem loja e sem build.**
 ## Para desenvolvedores
 
 As decisões de arquitetura, o mapa de arquivos e o guia para adicionar ferramentas estão em [`CLAUDE.md`](CLAUDE.md).
-Cada pasta tem um README descrevendo seus arquivos: [`js/`](js/README.md), [`js/tools/`](js/tools/README.md), [`css/`](css/README.md) e [`tests/`](tests/README.md).
+Cada pasta tem um README descrevendo seus arquivos: [`js/`](js/README.md), [`js/tools/`](js/tools/README.md), [`css/`](css/README.md), [`tests/`](tests/README.md) e [`docs/`](docs/README.md).
 Para o teste automático, rode `node tests/e2e.mjs` (requer Node 22+ e Google Chrome).

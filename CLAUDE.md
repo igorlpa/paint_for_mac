@@ -74,6 +74,7 @@ js/handles.js         Paint.handles: alças de arrastar para mudar o tamanho da 
 js/ui.js              Paint.ui: botões, paleta, selects, atalhos de teclado, barra de status, título
 js/main.js            Inicialização (sempre o último)
 tests/e2e.mjs         Teste automático no Chrome headless
+docs/screenshot.png   Print do app usado no README.md da raiz
 ```
 
 ### Fluxo de dados
@@ -114,7 +115,7 @@ tests/e2e.mjs         Teste automático no Chrome headless
 
 ## Convenções
 
-- **Cada pasta tem um `README.md`** descrevendo seus arquivos (`js/`, `js/tools/`, `css/`, `tests/`). Ao criar, remover ou mudar o papel de um arquivo, atualize o README da pasta, além do mapa de arquivos acima.
+- **Cada pasta tem um `README.md`** descrevendo seus arquivos (`js/`, `js/tools/`, `css/`, `tests/`, `docs/`). Ao criar, remover ou mudar o papel de um arquivo, atualize o README da pasta, além do mapa de arquivos acima.
 - **Sempre chame `Paint.history.push()` imediatamente ANTES de alterar pixels de `Paint.canvas.ctx`**, uma vez por operação do usuário. Ferramentas de arrastar fazem isso no `onDown`; linha e formas fazem no `onUp`.
 - Toda mudança de estado passa por `Paint.set()`. Não atribua `Paint.state.x = ...` direto, senão a UI não atualiza.
 - Sem dependências externas, CDN ou `fetch` (que é bloqueado em `file://`).
@@ -156,6 +157,7 @@ Formato: `AAAA-MM-DD — decisão — motivo`.
 - 2026-10-20 — Scripts clássicos + `window.Paint` — ES modules não funcionam em `file://`.
 - 2026-10-20 — Linha (Bresenham) e retângulo (`fillRect`) sem antialias — o `stroke()` deixava cantos cinza e halos no balde.
 - 2026-10-20 — Teste E2E com Chrome headless via CDP, sem dependências npm.
+- 2026-10-20 — Print do app em `docs/screenshot.png`, exibido no README — pedido do usuário.
 - 2026-10-20 — Alças para mudar o tamanho da tela arrastando a borda/canto — pedido do usuário, como no Paint.
 - 2026-10-20 — README em cada pasta descrevendo os arquivos — pedido do usuário, para facilitar a navegação.
 - 2026-10-20 — Zoom de 10% a 1600%, digitável, com −/+, ⌘−/⌘+/⌘0 e pinça — pedido do usuário (zoom out e digitar o valor).
