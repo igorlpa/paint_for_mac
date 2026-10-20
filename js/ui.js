@@ -18,6 +18,23 @@ Paint.ui = (function () {
     i: 'picker', t: 'text', l: 'line', r: 'rect', o: 'ellipse',
   };
 
+  // Zoom: valor livre entre os limites; os botões −/+ e ⌘−/⌘+ pulam entre estes níveis.
+  const ZOOM_MIN = 0.1;
+  const ZOOM_MAX = 16;
+  const ZOOM_STEPS = [0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 6, 8, 12, 16];
+
+  function setZoom(z) {
+    Paint.set('zoom', Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z)));
+  }
+
+  function stepZoom(dir) {
+    const z = Paint.state.zoom;
+    const next = dir > 0
+      ? ZOOM_STEPS.find((s) => s > z + 1e-9)
+      : [...ZOOM_STEPS].reverse().find((s) => s < z - 1e-9);
+    if (next) setZoom(next);
+  }
+
   const actions = {
     'new': () => Paint.file.newImage(),
     'open': () => Paint.file.open(),
@@ -30,6 +47,9 @@ Paint.ui = (function () {
     'paste': () => Paint.file.pasteFromClipboard(),
     'delete': () => Paint.tools.select.deleteSelection(),
     'select-all': () => Paint.tools.select.selectAll(),
+    'zoom-in': () => stepZoom(1),
+    'zoom-out': () => stepZoom(-1),
+    'zoom-reset': () => setZoom(1),
     'scale': () => Paint.resize.open(),
     'resize': () => Paint.file.promptResize(),
     'clear': () => Paint.file.clear(),
@@ -75,9 +95,37 @@ Paint.ui = (function () {
     bind('#size', 'size', Number);
     bind('#shape-mode', 'shapeMode');
     bind('#font-size', 'fontSize', Number);
-    bind('#zoom', 'zoom', Number);
     bind('#primary', 'primary');
     bind('#secondary', 'secondary');
+    bindZoomInput();
+  }
+
+  // O zoom digitado só é aplicado ao confirmar (Enter ou sair do campo), não a cada tecla:
+  // senão digitar "50" passaria por 5%. Valor inválido volta ao zoom atual.
+  function bindZoomInput() {
+    const el = $('#zoom');
+    const show = () => { el.value = Math.round(Paint.state.zoom * 100); };
+    el.addEventListener('change', () => {
+      const percent = parseFloat(el.value);
+      if (percent > 0) setZoom(percent / 100);
+      show();
+    });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') el.blur();
+      if (e.key === 'Escape') {
+        show();
+        el.blur();
+      }
+    });
+  }
+
+  // Pinça no trackpad chega como 'wheel' com ctrlKey. Sem isso, o navegador daria zoom na página toda.
+  function bindPinchZoom() {
+    $('.workspace').addEventListener('wheel', (e) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      setZoom(Paint.state.zoom * Math.exp(-e.deltaY * 0.01));
+    }, { passive: false });
   }
 
   function bindKeyboard() {
@@ -100,6 +148,10 @@ Paint.ui = (function () {
           c: 'copy',
           x: 'cut',
           a: 'select-all',
+          '=': 'zoom-in',
+          '+': 'zoom-in',
+          '-': 'zoom-out',
+          '0': 'zoom-reset',
         };
         if (map[key]) {
           e.preventDefault();
@@ -136,8 +188,12 @@ Paint.ui = (function () {
         $('#' + key).value = value;
         break;
       case 'size':
+        $('#size').value = String(value);
+        break;
       case 'zoom':
-        $('#' + key).value = String(value);
+        $('#zoom').value = Math.round(value * 100);
+        $('[data-action="zoom-out"]').disabled = value <= ZOOM_MIN;
+        $('[data-action="zoom-in"]').disabled = value >= ZOOM_MAX;
         break;
       case 'shapeMode':
         $('#shape-mode').value = value;
@@ -177,6 +233,7 @@ Paint.ui = (function () {
     bindInputs();
     bindKeyboard();
     bindStatus();
+    bindPinchZoom();
     Paint.on('change', onChange);
     for (const [key, value] of Object.entries(Paint.state)) onChange({ key, value });
 

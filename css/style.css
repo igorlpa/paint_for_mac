@@ -137,9 +137,12 @@ button:disabled { opacity: 0.4; cursor: default; }
 
 #canvas,
 #overlay {
-  display: block;
-  image-rendering: pixelated; /* zoom sem borrar os pixels */
+  display: block; /* image-rendering é definido por zoom em canvas.js */
 }
+
+.zoom button { width: 28px; padding: 4px 0; }
+
+#zoom { width: 64px; text-align: right; }
 
 #overlay {
   position: absolute;
@@ -195,7 +198,7 @@ dialog .field {
   gap: 6px;
 }
 
-dialog input[type="number"] {
+input[type="number"] {
   font: inherit;
   color: inherit;
   background: var(--btn);

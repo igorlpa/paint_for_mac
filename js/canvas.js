@@ -55,12 +55,15 @@ Paint.canvas = (function () {
     Paint.emit('resize', { width, height });
   }
 
-  // Zoom é só CSS: os pixels continuam os mesmos, exibidos ampliados sem suavização.
+  // Zoom é só CSS: os pixels continuam os mesmos.
+  // Ampliado (≥100%): 'pixelated' mostra cada pixel nítido. Reduzido (<100%): suavização
+  // normal, senão linhas finas sumiriam ao descartar pixels.
   function applyZoom() {
     const z = Paint.state.zoom;
     for (const c of [api.el, api.overlay]) {
       c.style.width = c.width * z + 'px';
       c.style.height = c.height * z + 'px';
+      c.style.imageRendering = z >= 1 ? 'pixelated' : 'auto';
     }
   }
 

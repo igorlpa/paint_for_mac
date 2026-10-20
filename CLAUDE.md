@@ -39,12 +39,13 @@ Este arquivo registra **o que foi decidido e por quê**, para que futuras ediç�
 | 19 | **Seleção "levanta" os pixels só ao começar a arrastar** | Selecionar só para copiar não altera a imagem. O snapshot é tirado ao levantar, então mover + soltar = um passo de desfazer. |
 | 20 | **Colar aumenta a tela** se a imagem colada for maior | O Paint pergunta antes; aqui é automático por simplicidade. |
 | 21 | **Interface em português; código e identificadores em inglês; comentários em português** | Pedido do usuário (interface) e convenção de código. |
-| 22 | **Zoom só via CSS** (`image-rendering: pixelated`), com níveis de 100% a 800% | Os pixels reais não mudam. As coordenadas são convertidas em `canvas.js` → `point()`. |
+| 22 | **Zoom só via CSS**, de **10% a 1600%**; `image-rendering: pixelated` só quando ≥100% (abaixo disso, suavização normal) | Os pixels reais não mudam. As coordenadas são convertidas em `canvas.js` → `point()`, que funciona com zoom fracionário. Reduzido com `pixelated`, linhas finas sumiriam. |
 | 23 | **Teste E2E sem dependências** (`tests/e2e.mjs`, CDP via `WebSocket` nativo do Node) | Mantém o projeto sem `npm install`. O teste é só para desenvolvimento. |
 | 24 | **Dois comandos de tamanho, como no Paint:** "Redimensionar…" (`js/resize.js`) **escala** a imagem; "Tamanho da tela…" (`file.js`) corta ou aumenta a área **sem escalar** | São necessidades diferentes, e o Paint também separa as duas. |
 | 25 | **Diálogo de redimensionar:** porcentagem ou pixels; "Manter proporção" preenche a outra dimensão enquanto você digita; **campo vazio é calculado pela proporção** mesmo com "Manter proporção" desmarcado | Pedido do usuário: informar só uma dimensão e o programa calcular a outra. Trocar a unidade converte os valores digitados. O botão OK fica desabilitado se o resultado passar de `MAX_SIDE` (5000 px). |
 | 26 | **"Suavizar" ao escalar** (`imageSmoothingQuality = 'high'`), ligado por padrão e lembrado entre aberturas | É melhor para fotos. Desligado, usa vizinho mais próximo e mantém pixel art nítida. |
 | 27 | **Diálogos com `<dialog>` nativo** + `showModal()`; os atalhos globais ficam desativados enquanto há `dialog[open]` | Teclado, Esc e foco funcionam de graça. Evita `prompt()` quando há mais de um campo. |
+| 28 | **Controle de zoom digitável** (`<input type=number>` em %) + botões −/+ que pulam entre níveis fixos (`ZOOM_STEPS` em `ui.js`); atalhos ⌘−/⌘+/⌘0; pinça do trackpad (`wheel` com `ctrlKey`) | O valor digitado só é aplicado com Enter ou ao sair do campo; senão, digitar "50" passaria por 5%. Um valor inválido volta ao atual e Esc cancela. Sem interceptar a pinça, o navegador daria zoom na interface inteira. |
 
 ---
 
@@ -152,4 +153,5 @@ Formato: `AAAA-MM-DD — decisão — motivo`.
 - 2026-10-20 — Scripts clássicos + `window.Paint` — ES modules não funcionam em `file://`.
 - 2026-10-20 — Linha (Bresenham) e retângulo (`fillRect`) sem antialias — o `stroke()` deixava cantos cinza e halos no balde.
 - 2026-10-20 — Teste E2E com Chrome headless via CDP, sem dependências npm.
+- 2026-10-20 — Zoom de 10% a 1600%, digitável, com −/+, ⌘−/⌘+/⌘0 e pinça — pedido do usuário (zoom out e digitar o valor).
 - 2026-10-20 — Adicionado "Redimensionar…" (escala por % ou px, proporção automática, campo vazio calculado) — pedido do usuário, como no Paint.

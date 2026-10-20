@@ -115,6 +115,23 @@ await check('texto vira pixels ao confirmar', `(async () => { Paint.set('primary
 await check('zoom 400% mapeia coordenadas', `Paint.set('zoom', 4); Paint.setTool('pencil'); Paint.set('primary','#ff0000'); T.drag([[700,550]]); [T.px(700,550), Paint.canvas.el.style.width]`, ['#ff0000','3200px']);
 await evaluate(`Paint.set('zoom', 1)`);
 
+await evaluate(`T.typeZoom = (v) => { const el = document.getElementById('zoom'); el.value = v; el.dispatchEvent(new Event('change')); }; true`);
+await check('zoom digitado 50% reduz e mapeia coordenadas', `T.typeZoom('50'); Paint.set('primary','#00ff00'); T.drag([[600,500]]);
+  [Paint.state.zoom, Paint.canvas.el.style.width, Paint.canvas.el.style.imageRendering, T.px(600,500)]`, [0.5, '400px', 'auto', '#00ff00']);
+await check('zoom digitado fracionário (137%)', `T.typeZoom('137'); [Paint.state.zoom, document.getElementById('zoom').value]`, [1.37, '137']);
+await check('zoom ≥100% fica pixelado', `Paint.canvas.el.style.imageRendering`, 'pixelated');
+await check('zoom abaixo do mínimo trava em 10%', `T.typeZoom('3'); [Paint.state.zoom, document.getElementById('zoom').value]`, [0.1, '10']);
+await check('botão − desabilitado no mínimo', `document.querySelector('[data-action=zoom-out]').disabled`, true);
+await check('zoom inválido volta ao atual', `T.typeZoom('abc'); [Paint.state.zoom, document.getElementById('zoom').value]`, [0.1, '10']);
+await check('botões +/− pulam níveis', `(() => { T.typeZoom('100'); document.querySelector('[data-action=zoom-out]').click(); const a = Paint.state.zoom;
+  document.querySelector('[data-action=zoom-in]').click(); document.querySelector('[data-action=zoom-in]').click(); return [a, Paint.state.zoom]; })()`, [0.75, 1.5]);
+await check('atalhos ⌘− / ⌘0 / ⌘+', `(() => { const k = (key) => document.body.dispatchEvent(new KeyboardEvent('keydown', { key, metaKey: true, bubbles: true }));
+  k('-'); const a = Paint.state.zoom; k('0'); const b = Paint.state.zoom; k('='); return [a, b, Paint.state.zoom]; })()`, [1, 1, 1.5]);
+await check('pinça no trackpad (ctrl+wheel) dá zoom', `Paint.set('zoom', 1);
+  document.querySelector('.workspace').dispatchEvent(new WheelEvent('wheel', { deltaY: -50, ctrlKey: true, bubbles: true, cancelable: true }));
+  Paint.state.zoom > 1`, true);
+await evaluate(`Paint.set('zoom', 1)`);
+
 await check('tamanho da tela preserva conteúdo', `Paint.history.push(); Paint.canvas.setSize(1000, 700, true); [Paint.canvas.el.width, T.px(700,550), T.px(950,650)]`, [1000,'#ff0000','#ffffff']);
 await check('desfazer volta o tamanho', `Paint.history.undo(); [Paint.canvas.el.width, Paint.canvas.el.height]`, [800,600]);
 

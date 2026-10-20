@@ -30,15 +30,12 @@
       <button data-action="resize" title="Mudar o tamanho da tela sem escalar (corta ou aumenta a área)">Tamanho da tela…</button>
       <button data-action="clear" title="Pintar a imagem toda de branco">Limpar</button>
     </div>
-    <label class="group">Zoom
-      <select id="zoom">
-        <option value="1">100%</option>
-        <option value="2">200%</option>
-        <option value="4">400%</option>
-        <option value="6">600%</option>
-        <option value="8">800%</option>
-      </select>
-    </label>
+    <div class="group zoom">Zoom
+      <button data-action="zoom-out" title="Diminuir zoom (⌘−)">−</button>
+      <input type="number" id="zoom" min="10" max="1600" step="any" aria-label="Zoom em porcentagem"
+             title="Digite o zoom (10% a 1600%) e tecle Enter — ⌘0 volta a 100%">%
+      <button data-action="zoom-in" title="Aumentar zoom (⌘+)">+</button>
+    </div>
     <input type="file" id="file-input" accept="image/*" hidden>
   </header>
 

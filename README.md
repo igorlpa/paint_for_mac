@@ -16,7 +16,7 @@ Roda no navegador: **sem instalação, sem loja e sem build.**
 - **Área de transferência:** copiar, recortar, colar (inclusive prints do macOS) e excluir.
 - **Arquivo:** abrir imagem, salvar em PNG ou JPEG e mudar o tamanho da tela.
 - **Redimensionar:** escala a imagem por porcentagem ou pixels. Com "Manter proporção", basta informar uma dimensão e a outra é calculada.
-- **Exibição:** zoom de 100% a 800%.
+- **Exibição:** zoom de 10% a 1600%. Dá para digitar o valor, usar os botões −/+, ⌘−/⌘+/⌘0 ou a pinça do trackpad.
 
 ## Atalhos
 
@@ -27,6 +27,7 @@ Roda no navegador: **sem instalação, sem loja e sem build.**
 | Abrir | ⌘O |
 | Copiar / Recortar / Colar | ⌘C / ⌘X / ⌘V |
 | Selecionar tudo | ⌘A |
+| Zoom − / + / 100% | ⌘− / ⌘+ / ⌘0 |
 | Excluir seleção | Delete |
 | Confirmar texto/seleção | Esc |
 | Trocar cor 1 ↔ cor 2 | X |
