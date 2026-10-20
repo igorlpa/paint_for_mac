@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Paint</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="menubar">
+    <div class="group">
+      <button data-action="new" title="Nova imagem">Novo</button>
+      <button data-action="open" title="Abrir imagem (⌘O)">Abrir</button>
+      <button data-action="save-png" title="Salvar como PNG (⌘S)">Salvar PNG</button>
+      <button data-action="save-jpeg" title="Salvar como JPEG">Salvar JPEG</button>
+    </div>
+    <div class="group">
+      <button data-action="undo" title="Desfazer (⌘Z)">↶ Desfazer</button>
+      <button data-action="redo" title="Refazer (⇧⌘Z)">↷ Refazer</button>
+    </div>
+    <div class="group">
+      <button data-action="cut" title="Recortar seleção (⌘X)">Recortar</button>
+      <button data-action="copy" title="Copiar seleção (⌘C)">Copiar</button>
+      <button data-action="paste" title="Colar (⌘V)">Colar</button>
+      <button data-action="delete" title="Excluir seleção (Delete)">Excluir</button>
+      <button data-action="select-all" title="Selecionar tudo (⌘A)">Selecionar tudo</button>
+    </div>
+    <div class="group">
+      <button data-action="resize" title="Mudar o tamanho da tela">Tamanho da tela…</button>
+      <button data-action="clear" title="Pintar a imagem toda de branco">Limpar</button>
+    </div>
+    <label class="group">Zoom
+      <select id="zoom">
+        <option value="1">100%</option>
+        <option value="2">200%</option>
+        <option value="4">400%</option>
+        <option value="6">600%</option>
+        <option value="8">800%</option>
+      </select>
+    </label>
+    <input type="file" id="file-input" accept="image/*" hidden>
+  </header>
+
+  <div class="toolbar">
+    <div class="group tools" role="toolbar" aria-label="Ferramentas">
+      <button class="tool" data-tool="select" title="Seleção (S)">⬚</button>
+      <button class="tool" data-tool="pencil" title="Lápis (P)">✏️</button>
+      <button class="tool" data-tool="brush" title="Pincel (B)">🖌️</button>
+      <button class="tool" data-tool="eraser" title="Borracha (E)">🧽</button>
+      <button class="tool" data-tool="fill" title="Balde de tinta (F)">🪣</button>
+      <button class="tool" data-tool="picker" title="Conta-gotas (I)">💧</button>
+      <button class="tool" data-tool="text" title="Texto (T)"><b>A</b></button>
+      <button class="tool" data-tool="line" title="Linha (L) — Shift trava em 45°">╱</button>
+      <button class="tool" data-tool="rect" title="Retângulo (R) — Shift = quadrado">▭</button>
+      <button class="tool" data-tool="ellipse" title="Elipse (O) — Shift = círculo">◯</button>
+    </div>
+    <label class="group">Espessura
+      <select id="size">
+        <option value="1">1 px</option>
+        <option value="3">3 px</option>
+        <option value="5">5 px</option>
+        <option value="8">8 px</option>
+      </select>
+    </label>
+    <label class="group">Formas
+      <select id="shape-mode">
+        <option value="outline">Contorno</option>
+        <option value="fill">Preenchido</option>
+        <option value="both">Contorno + preenchimento</option>
+      </select>
+    </label>
+    <label class="group">Fonte
+      <select id="font-size">
+        <option value="12">12</option>
+        <option value="16">16</option>
+        <option value="24">24</option>
+        <option value="32">32</option>
+        <option value="48">48</option>
+        <option value="72">72</option>
+      </select>
+    </label>
+    <div class="group colors">
+      <label title="Cor 1 — clique esquerdo"><input type="color" id="primary"> Cor 1</label>
+      <label title="Cor 2 — clique direito, borracha e fundo"><input type="color" id="secondary"> Cor 2</label>
+      <button data-action="swap-colors" title="Trocar cores (X)">⇄</button>
+      <div class="palette" id="palette"></div>
+    </div>
+  </div>
+
+  <main class="workspace">
+    <div class="canvas-wrap" id="canvas-wrap">
+      <canvas id="canvas"></canvas>
+      <canvas id="overlay"></canvas>
+    </div>
+  </main>
+
+  <footer class="statusbar">
+    <span id="status-pos"></span>
+    <span id="status-size"></span>
+    <span id="status-sel"></span>
+  </footer>
+
+  <!-- Ordem importa: cada script depende dos anteriores (sem ES modules, ver CLAUDE.md). -->
+  <script src="js/state.js"></script>
+  <script src="js/draw.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/tools/select.js"></script>
+  <script src="js/tools/pencil.js"></script>
+  <script src="js/tools/brush.js"></script>
+  <script src="js/tools/eraser.js"></script>
+  <script src="js/tools/fill.js"></script>
+  <script src="js/tools/picker.js"></script>
+  <script src="js/tools/text.js"></script>
+  <script src="js/tools/line.js"></script>
+  <script src="js/tools/shapes.js"></script>
+  <script src="js/file.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
