@@ -111,6 +111,7 @@ tests/e2e.mjs         Teste automático no Chrome headless
 
 ## Convenções
 
+- **Cada pasta tem um `README.md`** descrevendo seus arquivos (`js/`, `js/tools/`, `css/`, `tests/`). Ao criar, remover ou mudar o papel de um arquivo, atualize o README da pasta, além do mapa de arquivos acima.
 - **Sempre chame `Paint.history.push()` imediatamente ANTES de alterar pixels de `Paint.canvas.ctx`**, uma vez por operação do usuário. Ferramentas de arrastar fazem isso no `onDown`; linha e formas fazem no `onUp`.
 - Toda mudança de estado passa por `Paint.set()`. Não atribua `Paint.state.x = ...` direto, senão a UI não atualiza.
 - Sem dependências externas, CDN ou `fetch` (que é bloqueado em `file://`).
@@ -153,5 +154,6 @@ Formato: `AAAA-MM-DD — decisão — motivo`.
 - 2026-10-20 — Scripts clássicos + `window.Paint` — ES modules não funcionam em `file://`.
 - 2026-10-20 — Linha (Bresenham) e retângulo (`fillRect`) sem antialias — o `stroke()` deixava cantos cinza e halos no balde.
 - 2026-10-20 — Teste E2E com Chrome headless via CDP, sem dependências npm.
+- 2026-10-20 — README em cada pasta descrevendo os arquivos — pedido do usuário, para facilitar a navegação.
 - 2026-10-20 — Zoom de 10% a 1600%, digitável, com −/+, ⌘−/⌘+/⌘0 e pinça — pedido do usuário (zoom out e digitar o valor).
 - 2026-10-20 — Adicionado "Redimensionar…" (escala por % ou px, proporção automática, campo vazio calculado) — pedido do usuário, como no Paint.

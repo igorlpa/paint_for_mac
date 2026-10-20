@@ -37,4 +37,5 @@ Roda no navegador: **sem instalação, sem loja e sem build.**
 ## Para desenvolvedores
 
 As decisões de arquitetura, o mapa de arquivos e o guia para adicionar ferramentas estão em [`CLAUDE.md`](CLAUDE.md).
+Cada pasta tem um README descrevendo seus arquivos: [`js/`](js/README.md), [`js/tools/`](js/tools/README.md), [`css/`](css/README.md) e [`tests/`](tests/README.md).
 Para o teste automático, rode `node tests/e2e.mjs` (requer Node 22+ e Google Chrome).
