@@ -7,7 +7,8 @@
 ## Como rodar
 
 ```sh
-node tests/e2e.mjs
+node tests/e2e.mjs                   # testa os fontes (index.html)
+node tests/e2e.mjs dist/paint.html   # testa o arquivo único gerado pelo build
 ```
 
 Requisitos: **Node 22+** e **Google Chrome** em `/Applications`. Não há `npm install`: o teste conversa com o Chrome pelo DevTools Protocol usando o `WebSocket` nativo do Node.

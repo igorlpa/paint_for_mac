@@ -9,8 +9,22 @@ Este arquivo registra **o que foi decidido e por quê**, para que futuras ediç�
 ## Como rodar e testar
 
 - **Usar:** duplo clique em `index.html`, ou `open index.html` no terminal.
+- **Compartilhar:** envie só o `dist/paint.html`, o app inteiro num arquivo, gerado por `node scripts/build.mjs`.
 - **Teste automático:** `node tests/e2e.mjs`. Requer Node 22+ e Google Chrome em `/Applications`. O teste abre a página via `file://` no Chrome headless, desenha com eventos de ponteiro simulados e confere os pixels. Ele imprime PASS/FAIL, os erros de console e o caminho de um screenshot. Sai com código ≠ 0 se algo falhar.
+- **Testar o arquivo único:** `node tests/e2e.mjs dist/paint.html`.
 - **Teste manual mínimo após mudanças:** desenhar com cada ferramenta, ⌘Z/⇧⌘Z, salvar PNG, colar um print (⌃⇧⌘4 e depois ⌘V) no Safari **e** no Chrome.
+
+## Fluxo obrigatório antes de cada commit
+
+Pedido do usuário: **toda modificação validada deve gerar um build atualizado antes do commit.** E **só faça commit quando o usuário pedir.**
+
+1. Validar os fontes: `node tests/e2e.mjs` (tudo PASS, sem erros no console).
+2. Gerar o build: `node scripts/build.mjs`.
+3. Validar o build: `node tests/e2e.mjs dist/paint.html`.
+4. Conferir: `node scripts/build.mjs --check` deve dizer "atualizado".
+5. Fazer commit com os fontes **e** o `dist/paint.html` juntos.
+
+Mudanças só de documentação (`*.md`) não alteram o build, mas o `--check` continua valendo como verificação rápida.
 
 ---
 
@@ -47,6 +61,7 @@ Este arquivo registra **o que foi decidido e por quê**, para que futuras ediç�
 | 27 | **Diálogos com `<dialog>` nativo** + `showModal()`; os atalhos globais ficam desativados enquanto há `dialog[open]` | Teclado, Esc e foco funcionam de graça. Evita `prompt()` quando há mais de um campo. |
 | 28 | **Controle de zoom digitável** (`<input type=number>` em %) + botões −/+ que pulam entre níveis fixos (`ZOOM_STEPS` em `ui.js`); atalhos ⌘−/⌘+/⌘0; pinça do trackpad (`wheel` com `ctrlKey`) | O valor digitado só é aplicado com Enter ou ao sair do campo; senão, digitar "50" passaria por 5%. Um valor inválido volta ao atual e Esc cancela. Sem interceptar a pinça, o navegador daria zoom na interface inteira. |
 | 29 | **Alças na borda da tela** (`js/handles.js`): canto inferior direito, meio da direita e meio de baixo; arrastar muda o tamanho da tela **sem escalar** (como "Tamanho da tela…") e a área nova fica branca; Shift no canto mantém a proporção | Pedido do usuário ("como no Paint"). Durante o arraste, só um contorno tracejado (`#resize-preview`) e o status (`'canvas-drag'`) mudam; a imagem é alterada uma vez ao soltar, com um passo de desfazer. Soltar sem mudar o tamanho não cria passo. O arraste é medido em pixels da imagem, descontando o zoom. |
+| 30 | **Build para um único arquivo** (`scripts/build.mjs` → `dist/paint.html`), com CSS e JS embutidos, **versionado no git** | Pedido do usuário: um arquivo só, fácil de compartilhar. Mantemos os fontes separados para editar e o build junta tudo. O resultado é determinístico (sem data), então o diff só aparece quando o código muda. O `dist/` fica no git para sempre haver uma versão pronta. O "Nível 2" (um `Paint.app` com WebKit, que esbarra na assinatura/notarização da Apple) fica no backlog. |
 
 ---
 
@@ -73,7 +88,9 @@ js/resize.js          Paint.resize: diálogo "Redimensionar" (open) e scaleImage
 js/handles.js         Paint.handles: alças de arrastar para mudar o tamanho da tela
 js/ui.js              Paint.ui: botões, paleta, selects, atalhos de teclado, barra de status, título
 js/main.js            Inicialização (sempre o último)
-tests/e2e.mjs         Teste automático no Chrome headless
+tests/e2e.mjs         Teste automático no Chrome headless (fontes ou dist/paint.html)
+scripts/build.mjs     Build: gera dist/paint.html (arquivo único)
+dist/paint.html       GERADO — o app inteiro num arquivo para compartilhar; não editar
 docs/screenshot.png   Print do app usado no README.md da raiz
 ```
 
@@ -115,7 +132,7 @@ docs/screenshot.png   Print do app usado no README.md da raiz
 
 ## Convenções
 
-- **Cada pasta tem um `README.md`** descrevendo seus arquivos (`js/`, `js/tools/`, `css/`, `tests/`, `docs/`). Ao criar, remover ou mudar o papel de um arquivo, atualize o README da pasta, além do mapa de arquivos acima.
+- **Cada pasta tem um `README.md`** descrevendo seus arquivos (`js/`, `js/tools/`, `css/`, `tests/`, `docs/`, `scripts/`, `dist/`). Ao criar, remover ou mudar o papel de um arquivo, atualize o README da pasta, além do mapa de arquivos acima.
 - **Sempre chame `Paint.history.push()` imediatamente ANTES de alterar pixels de `Paint.canvas.ctx`**, uma vez por operação do usuário. Ferramentas de arrastar fazem isso no `onDown`; linha e formas fazem no `onUp`.
 - Toda mudança de estado passa por `Paint.set()`. Não atribua `Paint.state.x = ...` direto, senão a UI não atualiza.
 - Sem dependências externas, CDN ou `fetch` (que é bloqueado em `file://`).
@@ -145,7 +162,7 @@ docs/screenshot.png   Print do app usado no README.md da raiz
 - Balde com tolerância ajustável.
 - Seleção de forma livre e seleção transparente (ignorar a cor 2 ao mover).
 - Abrir arquivo arrastando para a janela (drag-and-drop).
-- Empacotar como app `.app` com Tauri (opcional, mantendo o mesmo código web).
+- "Nível 2": `Paint.app` nativo (Swift + WKWebView carregando o `dist/paint.html`). Precisa tratar abrir/salvar (NSOpenPanel/NSSavePanel), `confirm`/`prompt`, o menu Editar (⌘C/⌘V/⌘Z) e o aviso ao fechar. Sem Developer ID e notarização (US$ 99/ano), o Gatekeeper bloqueia a 1ª abertura.
 
 ---
 
@@ -157,6 +174,7 @@ Formato: `AAAA-MM-DD — decisão — motivo`.
 - 2026-10-20 — Scripts clássicos + `window.Paint` — ES modules não funcionam em `file://`.
 - 2026-10-20 — Linha (Bresenham) e retângulo (`fillRect`) sem antialias — o `stroke()` deixava cantos cinza e halos no balde.
 - 2026-10-20 — Teste E2E com Chrome headless via CDP, sem dependências npm.
+- 2026-10-20 — Build em arquivo único `dist/paint.html` e fluxo validar → build → commit — pedido do usuário.
 - 2026-10-20 — Print do app em `docs/screenshot.png`, exibido no README — pedido do usuário.
 - 2026-10-20 — Alças para mudar o tamanho da tela arrastando a borda/canto — pedido do usuário, como no Paint.
 - 2026-10-20 — README em cada pasta descrevendo os arquivos — pedido do usuário, para facilitar a navegação.

@@ -7,8 +7,9 @@ Roda no navegador: **sem instalação, sem loja e sem build.**
 
 ## Como usar
 
-1. Baixe ou clone esta pasta.
-2. Dê **duplo clique em `index.html`**. Ele abre no Safari ou no Chrome.
+**Jeito mais fácil:** pegue só o arquivo [`dist/paint.html`](dist/paint.html) e dê duplo clique. Ele abre no Safari ou no Chrome. É o app inteiro num arquivo de cerca de 60 KB, então dá para mandar por AirDrop, e-mail ou pendrive.
+
+Ou, com a pasta completa (para desenvolver): dê duplo clique em `index.html`.
 
 ## Funcionalidades
 
@@ -39,5 +40,6 @@ Roda no navegador: **sem instalação, sem loja e sem build.**
 ## Para desenvolvedores
 
 As decisões de arquitetura, o mapa de arquivos e o guia para adicionar ferramentas estão em [`CLAUDE.md`](CLAUDE.md).
-Cada pasta tem um README descrevendo seus arquivos: [`js/`](js/README.md), [`js/tools/`](js/tools/README.md), [`css/`](css/README.md), [`tests/`](tests/README.md) e [`docs/`](docs/README.md).
+Cada pasta tem um README descrevendo seus arquivos: [`js/`](js/README.md), [`js/tools/`](js/tools/README.md), [`css/`](css/README.md), [`tests/`](tests/README.md), [`docs/`](docs/README.md), [`scripts/`](scripts/README.md) e [`dist/`](dist/README.md).
+Para gerar o arquivo único, rode `node scripts/build.mjs`.
 Para o teste automático, rode `node tests/e2e.mjs` (requer Node 22+ e Google Chrome).

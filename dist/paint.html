@@ -1,0 +1,2012 @@
+<!doctype html>
+<!-- ARQUIVO GERADO por scripts/build.mjs a partir de index.html, css/ e js/. Não edite: altere os fontes e rode o build. -->
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Paint</title>
+  <style>
+:root {
+  color-scheme: light dark;
+  --bg: #f3f3f3;
+  --panel: #fbfbfb;
+  --border: #d4d4d4;
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --accent: #0a84ff;
+  --accent-bg: #dbeafe;
+  --btn: #ffffff;
+  --btn-hover: #eef0f3;
+  --workspace: #c8ced8;
+}
+
+/* Modo escuro do macOS. A imagem em si continua com as cores reais. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1e1e1e;
+    --panel: #2a2a2a;
+    --border: #3a3a3a;
+    --text: #f2f2f7;
+    --muted: #a1a1a6;
+    --accent-bg: #1d3b66;
+    --btn: #333333;
+    --btn-hover: #3d3d3d;
+    --workspace: #141414;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.menubar,
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 6px 10px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+button,
+select {
+  font: inherit;
+  color: inherit;
+  background: var(--btn);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+button:hover { background: var(--btn-hover); }
+button:disabled { opacity: 0.4; cursor: default; }
+
+.tool {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 16px;
+  display: grid;
+  place-items: center;
+}
+
+.tool.active {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+
+.colors label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.colors input[type="color"] {
+  width: 32px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+}
+
+.palette {
+  display: grid;
+  grid-template-columns: repeat(14, 16px);
+  gap: 2px;
+  margin-left: 6px;
+}
+
+.palette button {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+}
+
+.workspace {
+  flex: 1;
+  overflow: auto;
+  background: var(--workspace);
+  padding: 16px;
+}
+
+.canvas-wrap {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+
+#canvas,
+#overlay {
+  display: block; /* image-rendering é definido por zoom em canvas.js */
+}
+
+.zoom button { width: 28px; padding: 4px 0; }
+
+#zoom { width: 64px; text-align: right; }
+
+#overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  touch-action: none;
+}
+
+/* Alças de redimensionar a tela (posições e cursores como no Paint). */
+.handle {
+  position: absolute;
+  z-index: 2;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border: 1px solid #5a5a5a;
+  touch-action: none;
+}
+
+/* Área clicável maior que o quadradinho visível, para acertar fácil com o trackpad. */
+.handle::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+
+.handle-e  { right: -11px; top: calc(50% - 4px); cursor: ew-resize; }
+.handle-s  { bottom: -11px; left: calc(50% - 4px); cursor: ns-resize; }
+.handle-se { right: -11px; bottom: -11px; cursor: nwse-resize; }
+
+#resize-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  border: 1px dashed var(--text);
+  pointer-events: none;
+}
+
+.text-box {
+  position: absolute;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  border: 1px dashed #808080;
+  outline: none;
+  background: transparent;
+  resize: none;
+  overflow: hidden;
+  white-space: pre;
+  color-scheme: light;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+dialog {
+  min-width: 320px;
+  padding: 16px 20px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+}
+
+dialog::backdrop { background: rgba(0, 0, 0, 0.3); }
+
+dialog form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+dialog h2 { margin: 0; font-size: 15px; }
+
+dialog .hint { margin: 0; color: var(--muted); }
+
+dialog .row { display: flex; gap: 16px; }
+
+dialog .field {
+  display: grid;
+  grid-template-columns: 80px 1fr 24px;
+  align-items: center;
+  gap: 6px;
+}
+
+input[type="number"] {
+  font: inherit;
+  color: inherit;
+  background: var(--btn);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
+#resize-dialog[data-unit="percent"] .unit-label::after { content: "%"; }
+#resize-dialog[data-unit="pixels"] .unit-label::after { content: "px"; }
+
+#resize-result { margin: 0; font-weight: 600; }
+
+dialog .actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.statusbar {
+  display: flex;
+  gap: 24px;
+  min-height: 24px;
+  padding: 4px 10px;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+</style>
+</head>
+<body>
+  <header class="menubar">
+    <div class="group">
+      <button data-action="new" title="Nova imagem">Novo</button>
+      <button data-action="open" title="Abrir imagem (⌘O)">Abrir</button>
+      <button data-action="save-png" title="Salvar como PNG (⌘S)">Salvar PNG</button>
+      <button data-action="save-jpeg" title="Salvar como JPEG">Salvar JPEG</button>
+    </div>
+    <div class="group">
+      <button data-action="undo" title="Desfazer (⌘Z)">↶ Desfazer</button>
+      <button data-action="redo" title="Refazer (⇧⌘Z)">↷ Refazer</button>
+    </div>
+    <div class="group">
+      <button data-action="cut" title="Recortar seleção (⌘X)">Recortar</button>
+      <button data-action="copy" title="Copiar seleção (⌘C)">Copiar</button>
+      <button data-action="paste" title="Colar (⌘V)">Colar</button>
+      <button data-action="delete" title="Excluir seleção (Delete)">Excluir</button>
+      <button data-action="select-all" title="Selecionar tudo (⌘A)">Selecionar tudo</button>
+    </div>
+    <div class="group">
+      <button data-action="scale" title="Redimensionar (escalar) a imagem por porcentagem ou pixels">Redimensionar…</button>
+      <button data-action="resize" title="Mudar o tamanho da tela sem escalar (corta ou aumenta a área)">Tamanho da tela…</button>
+      <button data-action="clear" title="Pintar a imagem toda de branco">Limpar</button>
+    </div>
+    <div class="group zoom">Zoom
+      <button data-action="zoom-out" title="Diminuir zoom (⌘−)">−</button>
+      <input type="number" id="zoom" min="10" max="1600" step="any" aria-label="Zoom em porcentagem"
+             title="Digite o zoom (10% a 1600%) e tecle Enter — ⌘0 volta a 100%">%
+      <button data-action="zoom-in" title="Aumentar zoom (⌘+)">+</button>
+    </div>
+    <input type="file" id="file-input" accept="image/*" hidden>
+  </header>
+
+  <div class="toolbar">
+    <div class="group tools" role="toolbar" aria-label="Ferramentas">
+      <button class="tool" data-tool="select" title="Seleção (S)">⬚</button>
+      <button class="tool" data-tool="pencil" title="Lápis (P)">✏️</button>
+      <button class="tool" data-tool="brush" title="Pincel (B)">🖌️</button>
+      <button class="tool" data-tool="eraser" title="Borracha (E)">🧽</button>
+      <button class="tool" data-tool="fill" title="Balde de tinta (F)">🪣</button>
+      <button class="tool" data-tool="picker" title="Conta-gotas (I)">💧</button>
+      <button class="tool" data-tool="text" title="Texto (T)"><b>A</b></button>
+      <button class="tool" data-tool="line" title="Linha (L) — Shift trava em 45°">╱</button>
+      <button class="tool" data-tool="rect" title="Retângulo (R) — Shift = quadrado">▭</button>
+      <button class="tool" data-tool="ellipse" title="Elipse (O) — Shift = círculo">◯</button>
+    </div>
+    <label class="group">Espessura
+      <select id="size">
+        <option value="1">1 px</option>
+        <option value="3">3 px</option>
+        <option value="5">5 px</option>
+        <option value="8">8 px</option>
+      </select>
+    </label>
+    <label class="group">Formas
+      <select id="shape-mode">
+        <option value="outline">Contorno</option>
+        <option value="fill">Preenchido</option>
+        <option value="both">Contorno + preenchimento</option>
+      </select>
+    </label>
+    <label class="group">Fonte
+      <select id="font-size">
+        <option value="12">12</option>
+        <option value="16">16</option>
+        <option value="24">24</option>
+        <option value="32">32</option>
+        <option value="48">48</option>
+        <option value="72">72</option>
+      </select>
+    </label>
+    <div class="group colors">
+      <label title="Cor 1 — clique esquerdo"><input type="color" id="primary"> Cor 1</label>
+      <label title="Cor 2 — clique direito, borracha e fundo"><input type="color" id="secondary"> Cor 2</label>
+      <button data-action="swap-colors" title="Trocar cores (X)">⇄</button>
+      <div class="palette" id="palette"></div>
+    </div>
+  </div>
+
+  <main class="workspace">
+    <div class="canvas-wrap" id="canvas-wrap">
+      <canvas id="canvas"></canvas>
+      <canvas id="overlay"></canvas>
+      <div class="handle handle-e" data-dir="e" title="Arraste para mudar a largura da tela"></div>
+      <div class="handle handle-s" data-dir="s" title="Arraste para mudar a altura da tela"></div>
+      <div class="handle handle-se" data-dir="se" title="Arraste para mudar o tamanho da tela (Shift mantém a proporção)"></div>
+      <div id="resize-preview" hidden></div>
+    </div>
+  </main>
+
+  <dialog id="resize-dialog">
+    <form id="resize-form">
+      <h2>Redimensionar imagem</h2>
+      <p class="hint">Tamanho atual: <span id="resize-current"></span></p>
+      <div class="row">
+        <label><input type="radio" name="unit" value="percent" checked> Porcentagem</label>
+        <label><input type="radio" name="unit" value="pixels"> Pixels</label>
+      </div>
+      <label class="field">Horizontal
+        <input type="number" id="resize-w" min="0" step="any"><span class="unit-label"></span>
+      </label>
+      <label class="field">Vertical
+        <input type="number" id="resize-h" min="0" step="any"><span class="unit-label"></span>
+      </label>
+      <label><input type="checkbox" id="resize-keep" checked> Manter proporção</label>
+      <label><input type="checkbox" id="resize-smooth" checked> Suavizar (fotos; desmarque para pixel art)</label>
+      <p class="hint">Deixe um campo vazio para calculá-lo pela proporção da imagem.</p>
+      <p id="resize-result"></p>
+      <div class="actions">
+        <button type="button" id="resize-cancel">Cancelar</button>
+        <button type="submit" id="resize-ok" class="primary">OK</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer class="statusbar">
+    <span id="status-pos"></span>
+    <span id="status-size"></span>
+    <span id="status-sel"></span>
+  </footer>
+
+  <!-- Ordem importa: cada script depende dos anteriores (sem ES modules, ver CLAUDE.md). -->
+  <script>
+// --- js/state.js ---
+// Namespace global único do app.
+// Usamos scripts clássicos (não ES modules) porque navegadores bloqueiam `import`
+// em páginas abertas via file:// — e o app precisa abrir com duplo clique.
+window.Paint = (function () {
+  const listeners = {};
+
+  const state = {
+    tool: null,            // id da ferramenta ativa (ver Paint.tools)
+    previousTool: null,    // usado pelo conta-gotas para voltar à ferramenta anterior
+    primary: '#000000',    // cor 1: clique esquerdo
+    secondary: '#ffffff',  // cor 2: clique direito, borracha, fundo de recortes
+    size: 3,               // espessura em px (pincel, linha, formas)
+    shapeMode: 'outline',  // 'outline' | 'fill' | 'both'
+    fontSize: 16,
+    zoom: 1,
+    dirty: false,          // há alterações não salvas?
+    fileName: 'sem-titulo',
+  };
+
+  const tools = {};
+
+  return {
+    state,
+    tools,
+
+    on(evt, fn) {
+      (listeners[evt] ||= []).push(fn);
+    },
+
+    emit(evt, data) {
+      (listeners[evt] || []).forEach((fn) => fn(data));
+    },
+
+    // Toda mudança de estado passa por aqui para que a UI possa reagir ao evento 'change'.
+    set(key, value) {
+      if (state[key] === value) return;
+      state[key] = value;
+      this.emit('change', { key, value });
+    },
+
+    registerTool(tool) {
+      tools[tool.id] = tool;
+    },
+
+    currentTool() {
+      return tools[state.tool];
+    },
+
+    setTool(id) {
+      if (!tools[id]) return;
+      this.commitTool();
+      if (id !== state.tool) state.previousTool = state.tool;
+      this.set('tool', id);
+    },
+
+    // Finaliza operações "abertas" da ferramenta atual (seleção flutuante, caixa de texto).
+    commitTool() {
+      const tool = this.currentTool();
+      if (tool && tool.commit) tool.commit();
+    },
+  };
+})();
+</script>
+  <script>
+// --- js/draw.js ---
+// Funções utilitárias de desenho compartilhadas pelas ferramentas.
+Paint.draw = {
+  // Linha de Bresenham: pinta um quadrado size×size em cada pixel do caminho.
+  // Não tem antialias, então o resultado é "pixelado" como no Paint (lápis, borracha).
+  pixelLine(ctx, x0, y0, x1, y1, size, color) {
+    ctx.fillStyle = color;
+    const off = Math.floor(size / 2);
+    const dx = Math.abs(x1 - x0);
+    const dy = -Math.abs(y1 - y0);
+    const sx = x0 < x1 ? 1 : -1;
+    const sy = y0 < y1 ? 1 : -1;
+    let err = dx + dy;
+    for (;;) {
+      ctx.fillRect(x0 - off, y0 - off, size, size);
+      if (x0 === x1 && y0 === y1) break;
+      const e2 = 2 * err;
+      if (e2 >= dy) { err += dy; x0 += sx; }
+      if (e2 <= dx) { err += dx; y0 += sy; }
+    }
+  },
+
+  // '#rrggbb' -> inteiro no formato do Uint32Array de ImageData (little-endian: ABGR).
+  hexToUint32(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const r = (n >> 16) & 255;
+    const g = (n >> 8) & 255;
+    const b = n & 255;
+    return ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0;
+  },
+
+  rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('');
+  },
+
+  // Retângulo normalizado entre dois pontos, incluindo ambos os pixels das pontas.
+  normRect(x0, y0, x1, y1) {
+    return {
+      x: Math.min(x0, x1),
+      y: Math.min(y0, y1),
+      w: Math.abs(x1 - x0) + 1,
+      h: Math.abs(y1 - y0) + 1,
+    };
+  },
+
+  makeCanvas(w, h) {
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    return c;
+  },
+};
+</script>
+  <script>
+// --- js/history.js ---
+// Desfazer/refazer com snapshots ImageData do canvas inteiro.
+// Regra: chame Paint.history.push() ANTES de alterar pixels do canvas principal.
+Paint.history = (function () {
+  const MAX_STEPS = 30;
+  const MAX_BYTES = 400 * 1024 * 1024; // evita estourar memória com imagens grandes
+
+  let undoStack = [];
+  let redoStack = [];
+
+  function snapshot() {
+    const { el, ctx } = Paint.canvas;
+    return ctx.getImageData(0, 0, el.width, el.height);
+  }
+
+  function restore(img) {
+    const { el, ctx } = Paint.canvas;
+    if (img.width !== el.width || img.height !== el.height) {
+      Paint.canvas.setSize(img.width, img.height, false);
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+
+  function trim() {
+    const bytes = () => undoStack.reduce((sum, img) => sum + img.data.length, 0);
+    while (undoStack.length > MAX_STEPS) undoStack.shift();
+    while (undoStack.length > 1 && bytes() > MAX_BYTES) undoStack.shift();
+  }
+
+  function changed() {
+    Paint.emit('history', { canUndo: undoStack.length > 0, canRedo: redoStack.length > 0 });
+  }
+
+  return {
+    push() {
+      undoStack.push(snapshot());
+      trim();
+      redoStack = [];
+      Paint.set('dirty', true);
+      changed();
+    },
+
+    undo() {
+      // Finaliza seleção/texto antes: o snapshot do início dessa operação já está na pilha.
+      Paint.commitTool();
+      if (!undoStack.length) return;
+      redoStack.push(snapshot());
+      restore(undoStack.pop());
+      Paint.set('dirty', true);
+      changed();
+    },
+
+    redo() {
+      Paint.commitTool();
+      if (!redoStack.length) return;
+      undoStack.push(snapshot());
+      restore(redoStack.pop());
+      Paint.set('dirty', true);
+      changed();
+    },
+
+    clear() {
+      undoStack = [];
+      redoStack = [];
+      changed();
+    },
+  };
+})();
+</script>
+  <script>
+// --- js/canvas.js ---
+// Dois canvases empilhados:
+//  - #canvas: a imagem real (bitmap). Só é alterado pelas ferramentas ao confirmar uma ação.
+//  - #overlay: pré-visualizações (linha/forma em andamento, seleção, cursor da borracha).
+// O overlay fica por cima e recebe todos os eventos de ponteiro.
+Paint.canvas = (function () {
+  const api = {
+    el: null,
+    ctx: null,
+    overlay: null,
+    octx: null,
+    wrap: null,
+    init,
+    setSize,
+    clearOverlay,
+  };
+
+  let activeTool = null;  // ferramenta capturada no pointerdown (pode mudar durante o traço)
+  let useSecondary = false;
+
+  function init(width, height) {
+    api.el = document.getElementById('canvas');
+    api.overlay = document.getElementById('overlay');
+    api.wrap = document.getElementById('canvas-wrap');
+    // willReadFrequently: o balde, o conta-gotas e o histórico leem pixels com frequência.
+    api.ctx = api.el.getContext('2d', { willReadFrequently: true });
+    api.octx = api.overlay.getContext('2d');
+
+    setSize(width, height, false);
+    bindPointer();
+
+    Paint.on('change', ({ key }) => {
+      if (key === 'tool') {
+        clearOverlay();
+        const tool = Paint.currentTool();
+        api.overlay.style.cursor = (tool && tool.cursor) || 'crosshair';
+      }
+      if (key === 'zoom') applyZoom();
+    });
+  }
+
+  // Muda o tamanho da imagem. keep=true preserva o conteúdo (área nova fica branca).
+  function setSize(width, height, keep = true) {
+    const { el, ctx, overlay } = api;
+    let old = null;
+    if (keep) {
+      old = Paint.draw.makeCanvas(el.width, el.height);
+      old.getContext('2d').drawImage(el, 0, 0);
+    }
+    el.width = overlay.width = width;
+    el.height = overlay.height = height;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+    if (old) ctx.drawImage(old, 0, 0);
+    applyZoom();
+    Paint.emit('resize', { width, height });
+  }
+
+  // Zoom é só CSS: os pixels continuam os mesmos.
+  // Ampliado (≥100%): 'pixelated' mostra cada pixel nítido. Reduzido (<100%): suavização
+  // normal, senão linhas finas sumiriam ao descartar pixels.
+  function applyZoom() {
+    const z = Paint.state.zoom;
+    for (const c of [api.el, api.overlay]) {
+      c.style.width = c.width * z + 'px';
+      c.style.height = c.height * z + 'px';
+      c.style.imageRendering = z >= 1 ? 'pixelated' : 'auto';
+    }
+  }
+
+  function clearOverlay() {
+    api.octx.clearRect(0, 0, api.overlay.width, api.overlay.height);
+  }
+
+  function point(e) {
+    const rect = api.overlay.getBoundingClientRect();
+    const scale = rect.width / api.overlay.width;
+    const secondary = activeTool ? useSecondary : false;
+    return {
+      x: Math.floor((e.clientX - rect.left) / scale),
+      y: Math.floor((e.clientY - rect.top) / scale),
+      shift: e.shiftKey,
+      secondary,  // true quando o traço começou com clique direito / Ctrl+clique
+      color: secondary ? Paint.state.secondary : Paint.state.primary,
+      altColor: secondary ? Paint.state.primary : Paint.state.secondary,
+    };
+  }
+
+  function bindPointer() {
+    const { overlay } = api;
+    overlay.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    overlay.addEventListener('pointerdown', (e) => {
+      if (activeTool || (e.button !== 0 && e.button !== 2)) return;
+      e.preventDefault();
+      overlay.setPointerCapture(e.pointerId);
+      activeTool = Paint.currentTool();
+      // Ctrl+clique no Mac equivale ao clique direito (útil no trackpad).
+      useSecondary = e.button === 2 || e.ctrlKey;
+      if (activeTool.onDown) activeTool.onDown(api.ctx, point(e));
+    });
+
+    overlay.addEventListener('pointermove', (e) => {
+      const p = point(e);
+      Paint.emit('pointer', p);
+      if (activeTool) {
+        if (activeTool.onMove) activeTool.onMove(api.ctx, p);
+      } else {
+        const tool = Paint.currentTool();
+        if (tool && tool.onHover) tool.onHover(p);
+      }
+    });
+
+    const end = (e) => {
+      if (!activeTool) return;
+      const tool = activeTool;
+      const p = point(e);
+      activeTool = null;
+      if (tool.onUp) tool.onUp(api.ctx, p);
+    };
+    overlay.addEventListener('pointerup', end);
+    overlay.addEventListener('pointercancel', end);
+
+    overlay.addEventListener('pointerleave', () => {
+      Paint.emit('pointer', null);
+      const tool = Paint.currentTool();
+      if (!activeTool && tool && tool.onLeave) tool.onLeave();
+    });
+  }
+
+  return api;
+})();
+</script>
+  <script>
+// --- js/tools/select.js ---
+// Seleção retangular.
+// Fluxo: arrastar cria a seleção (só marca a área). Ao arrastar de dentro dela pela primeira
+// vez, os pixels são "levantados" para um canvas flutuante (sel.float) e o buraco é pintado
+// com a cor 2. O flutuante é desenhado no overlay e só volta ao canvas no commit().
+// O snapshot do histórico é tirado ao levantar, então mover + soltar = um único passo de desfazer.
+(function () {
+  let sel = null;   // { x, y, w, h, float: HTMLCanvasElement|null }
+  let mode = null;  // 'create' | 'move'
+  let start = null;
+  let offset = null;
+
+  const C = () => Paint.canvas;
+
+  const inside = (p) =>
+    sel && p.x >= sel.x && p.x < sel.x + sel.w && p.y >= sel.y && p.y < sel.y + sel.h;
+
+  function clamp(p) {
+    const { width, height } = C().el;
+    return {
+      x: Math.min(Math.max(p.x, 0), width - 1),
+      y: Math.min(Math.max(p.y, 0), height - 1),
+    };
+  }
+
+  function render() {
+    const o = C().octx;
+    C().clearOverlay();
+    Paint.emit('selection', sel && { w: sel.w, h: sel.h });
+    if (!sel) return;
+    if (sel.float) o.drawImage(sel.float, sel.x, sel.y);
+    // Borda tracejada preto + branco para aparecer em qualquer fundo.
+    o.save();
+    o.lineWidth = 1;
+    o.setLineDash([4, 4]);
+    o.strokeStyle = '#000000';
+    o.strokeRect(sel.x + 0.5, sel.y + 0.5, sel.w - 1, sel.h - 1);
+    o.lineDashOffset = 4;
+    o.strokeStyle = '#ffffff';
+    o.strokeRect(sel.x + 0.5, sel.y + 0.5, sel.w - 1, sel.h - 1);
+    o.restore();
+  }
+
+  function copyRegion() {
+    const c = Paint.draw.makeCanvas(sel.w, sel.h);
+    c.getContext('2d').drawImage(C().el, sel.x, sel.y, sel.w, sel.h, 0, 0, sel.w, sel.h);
+    return c;
+  }
+
+  function lift() {
+    const { ctx } = C();
+    Paint.history.push();
+    sel.float = copyRegion();
+    ctx.fillStyle = Paint.state.secondary;
+    ctx.fillRect(sel.x, sel.y, sel.w, sel.h);
+  }
+
+  const tool = {
+    id: 'select',
+    cursor: 'crosshair',
+
+    onDown(ctx, p) {
+      if (inside(p)) {
+        mode = 'move';
+        offset = { x: p.x - sel.x, y: p.y - sel.y };
+        if (!sel.float) lift();
+        return;
+      }
+      tool.commit();
+      mode = 'create';
+      start = clamp(p);
+      sel = { x: start.x, y: start.y, w: 1, h: 1, float: null };
+      render();
+    },
+
+    onMove(ctx, p) {
+      if (mode === 'create') {
+        const q = clamp(p);
+        Object.assign(sel, Paint.draw.normRect(start.x, start.y, q.x, q.y));
+        render();
+      } else if (mode === 'move') {
+        sel.x = p.x - offset.x;
+        sel.y = p.y - offset.y;
+        render();
+      }
+    },
+
+    onUp() {
+      // Um clique simples (sem arrastar) só desfaz a seleção.
+      if (mode === 'create' && sel.w < 2 && sel.h < 2) {
+        sel = null;
+        render();
+      }
+      mode = null;
+    },
+
+    onHover(p) {
+      C().overlay.style.cursor = inside(p) ? 'move' : 'crosshair';
+    },
+
+    commit() {
+      if (sel && sel.float) C().ctx.drawImage(sel.float, sel.x, sel.y);
+      sel = null;
+      mode = null;
+      render();
+    },
+
+    // --- API usada por file.js e ui.js (copiar, recortar, colar, excluir, selecionar tudo) ---
+
+    getSelectionCanvas() {
+      if (!sel) return null;
+      return sel.float || copyRegion();
+    },
+
+    deleteSelection() {
+      if (!sel) return;
+      if (!sel.float) {
+        Paint.history.push();
+        const { ctx } = C();
+        ctx.fillStyle = Paint.state.secondary;
+        ctx.fillRect(sel.x, sel.y, sel.w, sel.h);
+      }
+      // Se estava flutuando, o buraco já foi pintado em lift(); basta descartar.
+      sel = null;
+      render();
+    },
+
+    selectAll() {
+      Paint.setTool('select');
+      tool.commit();
+      const { width, height } = C().el;
+      sel = { x: 0, y: 0, w: width, h: height, float: null };
+      render();
+    },
+
+    // Cola uma imagem/canvas como seleção flutuante no canto superior esquerdo.
+    // Aumenta a tela se a imagem colada for maior (o Paint pergunta; aqui aumentamos direto).
+    paste(source) {
+      Paint.setTool('select');
+      tool.commit();
+      const w = source.naturalWidth || source.width;
+      const h = source.naturalHeight || source.height;
+      Paint.history.push();
+      const { el } = C();
+      if (w > el.width || h > el.height) {
+        C().setSize(Math.max(w, el.width), Math.max(h, el.height), true);
+      }
+      const float = Paint.draw.makeCanvas(w, h);
+      float.getContext('2d').drawImage(source, 0, 0);
+      sel = { x: 0, y: 0, w, h, float };
+      render();
+    },
+  };
+
+  Paint.registerTool(tool);
+})();
+</script>
+  <script>
+// --- js/tools/pencil.js ---
+// Lápis: traço de 1px sem antialias.
+(function () {
+  let last = null;
+
+  Paint.registerTool({
+    id: 'pencil',
+    cursor: 'crosshair',
+
+    onDown(ctx, p) {
+      Paint.history.push();
+      last = p;
+      Paint.draw.pixelLine(ctx, p.x, p.y, p.x, p.y, 1, p.color);
+    },
+
+    onMove(ctx, p) {
+      Paint.draw.pixelLine(ctx, last.x, last.y, p.x, p.y, 1, p.color);
+      last = p;
+    },
+
+    onUp() {
+      last = null;
+    },
+  });
+})();
+</script>
+  <script>
+// --- js/tools/brush.js ---
+// Pincel: traço arredondado com a espessura escolhida.
+(function () {
+  let last = null;
+
+  Paint.registerTool({
+    id: 'brush',
+    cursor: 'crosshair',
+
+    onDown(ctx, p) {
+      Paint.history.push();
+      last = p;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x + 0.5, p.y + 0.5, Paint.state.size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    },
+
+    // Liga o ponto anterior ao atual para o traço não ficar "pontilhado" em movimentos rápidos.
+    onMove(ctx, p) {
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = Paint.state.size;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(last.x + 0.5, last.y + 0.5);
+      ctx.lineTo(p.x + 0.5, p.y + 0.5);
+      ctx.stroke();
+      last = p;
+    },
+
+    onUp() {
+      last = null;
+    },
+  });
+})();
+</script>
+  <script>
+// --- js/tools/eraser.js ---
+// Borracha: como no Paint, "apaga" pintando com a cor 2 (secundária).
+// Mostra um quadrado no overlay indicando a área que será apagada.
+(function () {
+  let last = null;
+
+  const eraserSize = () => Math.max(4, Paint.state.size * 2);
+
+  function preview(p) {
+    const { octx } = Paint.canvas;
+    const s = eraserSize();
+    const off = Math.floor(s / 2);
+    Paint.canvas.clearOverlay();
+    octx.strokeStyle = '#000000';
+    octx.lineWidth = 1;
+    octx.strokeRect(p.x - off + 0.5, p.y - off + 0.5, s - 1, s - 1);
+  }
+
+  Paint.registerTool({
+    id: 'eraser',
+    cursor: 'none',
+
+    onDown(ctx, p) {
+      Paint.history.push();
+      last = p;
+      Paint.draw.pixelLine(ctx, p.x, p.y, p.x, p.y, eraserSize(), Paint.state.secondary);
+      preview(p);
+    },
+
+    onMove(ctx, p) {
+      Paint.draw.pixelLine(ctx, last.x, last.y, p.x, p.y, eraserSize(), Paint.state.secondary);
+      last = p;
+      preview(p);
+    },
+
+    onUp() {
+      last = null;
+    },
+
+    onHover: preview,
+
+    onLeave() {
+      Paint.canvas.clearOverlay();
+    },
+  });
+})();
+</script>
+  <script>
+// --- js/tools/fill.js ---
+// Balde de tinta: flood fill por linhas (scanline) com tolerância zero, como no Paint.
+// Só pixels com exatamente a mesma cor do clicado são preenchidos — bordas com antialias
+// (pincel, formas) podem deixar um contorno sem preencher.
+Paint.registerTool({
+  id: 'fill',
+  cursor: 'crosshair',
+
+  onDown(ctx, p) {
+    const { width: w, height: h } = ctx.canvas;
+    if (p.x < 0 || p.y < 0 || p.x >= w || p.y >= h) return;
+
+    const img = ctx.getImageData(0, 0, w, h);
+    const data = new Uint32Array(img.data.buffer);
+    const target = data[p.y * w + p.x];
+    const replacement = Paint.draw.hexToUint32(p.color);
+    if (target === replacement) return;
+
+    Paint.history.push();
+
+    const stack = [[p.x, p.y]];
+    while (stack.length) {
+      let [x, y] = stack.pop();
+      while (x >= 0 && data[y * w + x] === target) x--;
+      x++;
+      let spanUp = false;
+      let spanDown = false;
+      while (x < w && data[y * w + x] === target) {
+        data[y * w + x] = replacement;
+        if (y > 0) {
+          const match = data[(y - 1) * w + x] === target;
+          if (match && !spanUp) stack.push([x, y - 1]);
+          spanUp = match;
+        }
+        if (y < h - 1) {
+          const match = data[(y + 1) * w + x] === target;
+          if (match && !spanDown) stack.push([x, y + 1]);
+          spanDown = match;
+        }
+        x++;
+      }
+    }
+
+    ctx.putImageData(img, 0, 0);
+  },
+});
+</script>
+  <script>
+// --- js/tools/picker.js ---
+// Conta-gotas: clique esquerdo define a cor 1, direito a cor 2.
+// Depois volta para a ferramenta anterior (comportamento do Paint).
+Paint.registerTool({
+  id: 'picker',
+  cursor: 'copy',
+
+  onDown(ctx, p) {
+    const { width, height } = ctx.canvas;
+    if (p.x < 0 || p.y < 0 || p.x >= width || p.y >= height) return;
+    const [r, g, b] = ctx.getImageData(p.x, p.y, 1, 1).data;
+    const hex = Paint.draw.rgbToHex(r, g, b);
+    Paint.set(p.secondary ? 'secondary' : 'primary', hex);
+    Paint.setTool(Paint.state.previousTool || 'pencil');
+  },
+});
+</script>
+  <script>
+// --- js/tools/text.js ---
+// Texto: clique abre uma <textarea> sobre o canvas; o texto só vira pixels ao confirmar
+// (clicar de novo no canvas, Esc, trocar de ferramenta, salvar ou desfazer).
+(function () {
+  const FONT = 'Arial, Helvetica, sans-serif';
+  const lineHeight = (fontSize) => Math.round(fontSize * 1.2);
+
+  let box = null; // { x, y, el }
+
+  function autosize() {
+    const el = box.el;
+    el.style.width = '0';
+    el.style.height = '0';
+    el.style.width = el.scrollWidth + Paint.state.fontSize * Paint.state.zoom + 'px';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  // Posição e fonte da textarea acompanham zoom, tamanho de fonte e cor 1.
+  function style() {
+    if (!box) return;
+    const z = Paint.state.zoom;
+    const fs = Paint.state.fontSize;
+    const s = box.el.style;
+    s.left = box.x * z - 1 + 'px'; // -1 compensa a borda tracejada
+    s.top = box.y * z - 1 + 'px';
+    s.font = `${fs * z}px ${FONT}`;
+    s.lineHeight = lineHeight(fs) * z + 'px';
+    s.color = Paint.state.primary;
+    autosize();
+  }
+
+  function open(p) {
+    const el = document.createElement('textarea');
+    el.className = 'text-box';
+    el.wrap = 'off';
+    el.spellcheck = false;
+    el.addEventListener('input', autosize);
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        tool.commit();
+      }
+    });
+    box = { x: p.x, y: p.y, el };
+    Paint.canvas.wrap.appendChild(el);
+    style();
+    setTimeout(() => el.focus());
+  }
+
+  const tool = {
+    id: 'text',
+    cursor: 'text',
+
+    onDown(ctx, p) {
+      if (box) tool.commit();
+      else open(p);
+    },
+
+    commit() {
+      if (!box) return;
+      const { x, y, el } = box;
+      box = null;
+      el.remove();
+      const text = el.value;
+      if (!text.trim()) return;
+
+      const { ctx } = Paint.canvas;
+      const fs = Paint.state.fontSize;
+      const lh = lineHeight(fs);
+      Paint.history.push();
+      ctx.font = `${fs}px ${FONT}`;
+      ctx.fillStyle = Paint.state.primary;
+      ctx.textBaseline = 'top';
+      // A textarea centraliza o texto na altura da linha; replica esse espaço extra.
+      const pad = (lh - fs) / 2;
+      text.split('\n').forEach((line, i) => ctx.fillText(line, x, y + pad + i * lh));
+    },
+  };
+
+  Paint.on('change', ({ key }) => {
+    if (key === 'primary' || key === 'fontSize' || key === 'zoom') style();
+  });
+
+  Paint.registerTool(tool);
+})();
+</script>
+  <script>
+// --- js/tools/line.js ---
+// Linha reta: pré-visualiza no overlay e grava no canvas ao soltar. Shift trava em 45°.
+// Espessura = quadrado de size×size carimbado ao longo da linha.
+(function () {
+  let start = null;
+
+  function endPoint(p) {
+    if (!p.shift) return p;
+    const dx = p.x - start.x;
+    const dy = p.y - start.y;
+    const step = Math.PI / 4;
+    const angle = Math.round(Math.atan2(dy, dx) / step) * step;
+    const len = Math.hypot(dx, dy);
+    return {
+      x: Math.round(start.x + Math.cos(angle) * len),
+      y: Math.round(start.y + Math.sin(angle) * len),
+    };
+  }
+
+  // Bresenham (sem antialias) como no Paint: linhas nítidas que o balde preenche sem halo.
+  function stroke(c, a, b, color) {
+    Paint.draw.pixelLine(c, a.x, a.y, b.x, b.y, Paint.state.size, color);
+  }
+
+  Paint.registerTool({
+    id: 'line',
+    cursor: 'crosshair',
+
+    onDown(ctx, p) {
+      start = p;
+    },
+
+    onMove(ctx, p) {
+      Paint.canvas.clearOverlay();
+      stroke(Paint.canvas.octx, start, endPoint(p), p.color);
+    },
+
+    onUp(ctx, p) {
+      Paint.canvas.clearOverlay();
+      Paint.history.push();
+      stroke(ctx, start, endPoint(p), p.color);
+      start = null;
+    },
+  });
+})();
+</script>
+  <script>
+// --- js/tools/shapes.js ---
+// Retângulo e elipse. Shift = quadrado/círculo.
+// Modos (Paint.state.shapeMode):
+//   outline -> contorno na cor do clique
+//   fill    -> preenchido na cor do clique, sem contorno
+//   both    -> contorno na cor do clique + preenchimento na outra cor
+(function () {
+  function constrain(start, p) {
+    if (!p.shift) return p;
+    const dx = p.x - start.x;
+    const dy = p.y - start.y;
+    const d = Math.max(Math.abs(dx), Math.abs(dy));
+    return { x: start.x + Math.sign(dx || 1) * d, y: start.y + Math.sign(dy || 1) * d };
+  }
+
+  // Retângulo com fillRect: bordas nítidas, sem antialias (como no Paint e bom para o balde).
+  function drawRect(c, r, mode, color, altColor) {
+    if (mode === 'fill') {
+      c.fillStyle = color;
+      c.fillRect(r.x, r.y, r.w, r.h);
+      return;
+    }
+    if (mode === 'both') {
+      c.fillStyle = altColor;
+      c.fillRect(r.x, r.y, r.w, r.h);
+    }
+    const t = Math.min(Paint.state.size, r.w, r.h);
+    c.fillStyle = color;
+    c.fillRect(r.x, r.y, r.w, t);
+    c.fillRect(r.x, r.y + r.h - t, r.w, t);
+    c.fillRect(r.x, r.y, t, r.h);
+    c.fillRect(r.x + r.w - t, r.y, t, r.h);
+  }
+
+  function drawShape(c, kind, a, b, color, altColor) {
+    const r = Paint.draw.normRect(a.x, a.y, b.x, b.y);
+    const mode = Paint.state.shapeMode;
+    if (kind === 'rect') {
+      drawRect(c, r, mode, color, altColor);
+      return;
+    }
+
+    // Elipse usa o path do canvas (com antialias). O contorno é recuado meia espessura
+    // para a forma caber exatamente no retângulo arrastado.
+    const s = mode === 'fill' ? 0 : Paint.state.size;
+    const w = Math.max(0, r.w - s);
+    const h = Math.max(0, r.h - s);
+    c.beginPath();
+    c.ellipse(r.x + r.w / 2, r.y + r.h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+
+    if (mode === 'fill') {
+      c.fillStyle = color;
+      c.fill();
+      return;
+    }
+    if (mode === 'both') {
+      c.fillStyle = altColor;
+      c.fill();
+    }
+    c.strokeStyle = color;
+    c.lineWidth = s;
+    c.stroke();
+  }
+
+  function makeShapeTool(id) {
+    let start = null;
+    return {
+      id,
+      cursor: 'crosshair',
+
+      onDown(ctx, p) {
+        start = p;
+      },
+
+      onMove(ctx, p) {
+        Paint.canvas.clearOverlay();
+        drawShape(Paint.canvas.octx, id, start, constrain(start, p), p.color, p.altColor);
+      },
+
+      onUp(ctx, p) {
+        Paint.canvas.clearOverlay();
+        Paint.history.push();
+        drawShape(ctx, id, start, constrain(start, p), p.color, p.altColor);
+        start = null;
+      },
+    };
+  }
+
+  Paint.registerTool(makeShapeTool('rect'));
+  Paint.registerTool(makeShapeTool('ellipse'));
+})();
+</script>
+  <script>
+// --- js/file.js ---
+// Operações de imagem e arquivo: novo, abrir, salvar, tamanho da tela, limpar
+// e área de transferência (copiar, recortar, colar).
+Paint.file = (function () {
+  const DEFAULT_SIZE = { width: 800, height: 600 };
+  const MAX_SIDE = 5000; // cada passo de desfazer guarda a imagem inteira em memória
+
+  // Cópia interna: garante copiar/colar dentro do app mesmo se a API do sistema falhar.
+  let internalClipboard = null;
+  let pastePending = false;
+
+  // Imagens são lidas como data: URL (FileReader). Assim o canvas não fica "contaminado"
+  // (tainted) e getImageData continua funcionando — inclusive em páginas file://.
+  function readImage(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = reader.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  function confirmDiscard() {
+    return !Paint.state.dirty || confirm('Há alterações não salvas. Deseja descartá-las?');
+  }
+
+  function newImage() {
+    if (!confirmDiscard()) return;
+    Paint.commitTool();
+    Paint.canvas.setSize(DEFAULT_SIZE.width, DEFAULT_SIZE.height, false);
+    Paint.history.clear();
+    Paint.set('dirty', false);
+    Paint.set('fileName', 'sem-titulo');
+  }
+
+  function open() {
+    if (!confirmDiscard()) return;
+    const input = document.getElementById('file-input');
+    input.value = '';
+    input.click();
+  }
+
+  async function onFileChosen(file) {
+    try {
+      const img = await readImage(file);
+      Paint.commitTool();
+      Paint.canvas.setSize(img.naturalWidth, img.naturalHeight, false);
+      Paint.canvas.ctx.drawImage(img, 0, 0);
+      Paint.history.clear();
+      Paint.set('dirty', false);
+      Paint.set('fileName', file.name.replace(/\.[^.]+$/, ''));
+    } catch {
+      alert('Não foi possível abrir esta imagem.');
+    }
+  }
+
+  function download(blob, filename) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  // Chrome/Edge: usa a janela "Salvar como" do sistema (File System Access API).
+  // Safari/Firefox: baixa o arquivo (normalmente vai para a pasta Downloads).
+  async function save(type = 'image/png') {
+    Paint.commitTool();
+    const ext = type === 'image/jpeg' ? 'jpg' : 'png';
+    const filename = `${Paint.state.fileName}.${ext}`;
+    const blob = await new Promise((resolve) => Paint.canvas.el.toBlob(resolve, type, 0.92));
+    if (!blob) {
+      alert('Não foi possível gerar a imagem.');
+      return;
+    }
+
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: filename,
+          types: [{ description: ext.toUpperCase(), accept: { [type]: ['.' + ext] } }],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        Paint.set('fileName', handle.name.replace(/\.[^.]+$/, ''));
+        Paint.set('dirty', false);
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return; // usuário cancelou
+        // Qualquer outro erro: cai no download comum abaixo.
+      }
+    }
+
+    download(blob, filename);
+    Paint.set('dirty', false);
+  }
+
+  function promptResize() {
+    Paint.commitTool();
+    const { width, height } = Paint.canvas.el;
+    const answer = prompt('Novo tamanho da tela (largura x altura, em pixels):', `${width}x${height}`);
+    if (!answer) return;
+    const m = answer.match(/^\s*(\d+)\s*[x×,]\s*(\d+)\s*$/i);
+    if (!m) {
+      alert('Formato inválido. Use, por exemplo, 800x600.');
+      return;
+    }
+    const w = Number(m[1]);
+    const h = Number(m[2]);
+    if (w < 1 || h < 1 || w > MAX_SIDE || h > MAX_SIDE) {
+      alert(`Use valores entre 1 e ${MAX_SIDE}.`);
+      return;
+    }
+    Paint.history.push();
+    Paint.canvas.setSize(w, h, true);
+  }
+
+  function clear() {
+    Paint.commitTool();
+    const { el, ctx } = Paint.canvas;
+    Paint.history.push();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, el.width, el.height);
+  }
+
+  // --- Área de transferência ---
+
+  function copy() {
+    const selection = Paint.tools.select.getSelectionCanvas();
+    if (!selection) return false;
+    internalClipboard = Paint.draw.makeCanvas(selection.width, selection.height);
+    internalClipboard.getContext('2d').drawImage(selection, 0, 0);
+
+    if (navigator.clipboard && window.ClipboardItem) {
+      // Passar uma Promise (e não o Blob pronto) é o que o Safari exige para manter o gesto do usuário.
+      const blob = new Promise((resolve) => selection.toBlob(resolve, 'image/png'));
+      navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).catch(() => {});
+    }
+    return true;
+  }
+
+  function cut() {
+    if (copy()) Paint.tools.select.deleteSelection();
+  }
+
+  async function pasteBlob(blob) {
+    try {
+      Paint.tools.select.paste(await readImage(blob));
+    } catch {
+      pasteInternal();
+    }
+  }
+
+  function pasteInternal() {
+    if (internalClipboard) Paint.tools.select.paste(internalClipboard);
+  }
+
+  // Lê a área de transferência do sistema pela API assíncrona (botão "Colar" e fallback do ⌘V).
+  // O Safari mostra um pequeno botão "Colar" para o usuário confirmar.
+  async function pasteFromClipboard() {
+    try {
+      if (navigator.clipboard && navigator.clipboard.read) {
+        const items = await navigator.clipboard.read();
+        for (const item of items) {
+          const type = item.types.find((t) => t.startsWith('image/'));
+          if (type) {
+            await pasteBlob(await item.getType(type));
+            return;
+          }
+        }
+      }
+    } catch {
+      // Sem permissão ou sem suporte: usa a cópia interna.
+    }
+    pasteInternal();
+  }
+
+  // ⌘V: o Chrome dispara o evento 'paste' no documento; o Safari pode não disparar quando
+  // nada editável está focado. Se o evento não vier, recorre à API assíncrona.
+  function onPasteShortcut() {
+    pastePending = true;
+    setTimeout(() => {
+      if (!pastePending) return;
+      pastePending = false;
+      pasteFromClipboard();
+    }, 0);
+  }
+
+  function init() {
+    document.getElementById('file-input').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) onFileChosen(file);
+    });
+
+    document.addEventListener('paste', (e) => {
+      if (e.target instanceof Element && e.target.matches('textarea, input')) return;
+      pastePending = false;
+      e.preventDefault();
+      const items = Array.from((e.clipboardData && e.clipboardData.items) || []);
+      const item = items.find((i) => i.type.startsWith('image/'));
+      if (item) pasteBlob(item.getAsFile());
+      else pasteInternal();
+    });
+  }
+
+  return {
+    MAX_SIDE,
+    init,
+    newImage,
+    open,
+    save,
+    promptResize,
+    clear,
+    copy,
+    cut,
+    pasteFromClipboard,
+    onPasteShortcut,
+  };
+})();
+</script>
+  <script>
+// --- js/resize.js ---
+// Redimensionar (escalar) a imagem inteira, como o "Redimensionar" do Paint.
+// Diferente de "Tamanho da tela" (file.js), que corta/estende sem escalar.
+// - Unidade: porcentagem ou pixels (trocar a unidade converte os valores digitados).
+// - "Manter proporção": ao digitar uma dimensão, a outra é preenchida na hora.
+// - Campo vazio: é calculado pela proporção da imagem atual (mesmo sem "Manter proporção").
+Paint.resize = (function () {
+  const $ = (sel) => document.querySelector(sel);
+  let dialog, form, wIn, hIn, keep, smooth, result, okBtn;
+  let base = { w: 1, h: 1 }; // tamanho da imagem quando o diálogo abriu
+
+  const unit = () => form.elements.unit.value; // 'percent' | 'pixels'
+  const num = (input) => {
+    const v = parseFloat(input.value);
+    return v > 0 ? v : null;
+  };
+  const round1 = (v) => Math.round(v * 10) / 10;
+
+  // Converte o que foi digitado em pixels finais, completando o campo vazio pela proporção.
+  function target() {
+    const w = num(wIn);
+    const h = num(hIn);
+    if (w === null && h === null) return null;
+    const percent = unit() === 'percent';
+    let pw = w === null ? null : percent ? (base.w * w) / 100 : w;
+    let ph = h === null ? null : percent ? (base.h * h) / 100 : h;
+    if (pw === null) pw = (ph * base.w) / base.h;
+    if (ph === null) ph = (pw * base.h) / base.w;
+    return { w: Math.max(1, Math.round(pw)), h: Math.max(1, Math.round(ph)) };
+  }
+
+  function showResult() {
+    const t = target();
+    const max = Paint.file.MAX_SIDE;
+    let text = 'Informe ao menos uma dimensão.';
+    let ok = false;
+    if (t && (t.w > max || t.h > max)) {
+      text = `Resultado: ${t.w} × ${t.h} px — máximo de ${max} px por lado.`;
+    } else if (t) {
+      text = `Resultado: ${t.w} × ${t.h} px`;
+      ok = true;
+    }
+    result.textContent = text;
+    okBtn.disabled = !ok;
+  }
+
+  // Com "Manter proporção", preenche o outro campo a partir do que foi editado.
+  function sync(changed) {
+    if (keep.checked) {
+      const other = changed === wIn ? hIn : wIn;
+      const v = num(changed);
+      if (v === null) {
+        other.value = '';
+      } else if (unit() === 'percent') {
+        other.value = v;
+      } else {
+        const ratio = changed === wIn ? base.h / base.w : base.w / base.h;
+        other.value = Math.max(1, Math.round(v * ratio));
+      }
+    }
+    showResult();
+  }
+
+  function onUnitChange() {
+    const toPercent = unit() === 'percent';
+    for (const [input, size] of [[wIn, base.w], [hIn, base.h]]) {
+      const v = num(input);
+      if (v === null) continue;
+      input.value = toPercent ? round1((v / size) * 100) : Math.round((size * v) / 100);
+    }
+    $('#resize-dialog').dataset.unit = unit();
+    showResult();
+  }
+
+  function open() {
+    Paint.commitTool();
+    const { width, height } = Paint.canvas.el;
+    base = { w: width, h: height };
+    form.elements.unit.value = 'percent';
+    dialog.dataset.unit = 'percent';
+    wIn.value = 100;
+    hIn.value = 100;
+    keep.checked = true;
+    $('#resize-current').textContent = `${width} × ${height} px`;
+    showResult();
+    dialog.showModal();
+    wIn.select();
+  }
+
+  // Escala a imagem para w×h. Suavização: melhor para fotos; desligada = pixels nítidos (pixel art).
+  function scaleImage(w, h, smoothing) {
+    const { el } = Paint.canvas;
+    if (w === el.width && h === el.height) return;
+    Paint.history.push();
+    const old = Paint.draw.makeCanvas(el.width, el.height);
+    old.getContext('2d').drawImage(el, 0, 0);
+    Paint.canvas.setSize(w, h, false);
+    const { ctx } = Paint.canvas;
+    ctx.imageSmoothingEnabled = smoothing;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(old, 0, 0, w, h);
+    ctx.imageSmoothingEnabled = true;
+  }
+
+  function init() {
+    dialog = $('#resize-dialog');
+    form = $('#resize-form');
+    wIn = $('#resize-w');
+    hIn = $('#resize-h');
+    keep = $('#resize-keep');
+    smooth = $('#resize-smooth');
+    result = $('#resize-result');
+    okBtn = $('#resize-ok');
+
+    wIn.addEventListener('input', () => sync(wIn));
+    hIn.addEventListener('input', () => sync(hIn));
+    form.addEventListener('change', (e) => {
+      if (e.target.name === 'unit') onUnitChange();
+      if (e.target === keep && keep.checked) sync(num(wIn) !== null ? wIn : hIn);
+    });
+    $('#resize-cancel').addEventListener('click', () => dialog.close());
+
+    // OK é o único botão submit, então Enter num campo também confirma.
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const t = target();
+      if (!t || okBtn.disabled) return;
+      dialog.close();
+      scaleImage(t.w, t.h, smooth.checked);
+    });
+  }
+
+  return { init, open, scaleImage };
+})();
+</script>
+  <script>
+// --- js/handles.js ---
+// Alças para mudar o tamanho da tela arrastando, como no Paint:
+// canto inferior direito (largura + altura), meio da borda direita (largura) e meio da
+// borda inferior (altura). Durante o arraste só um contorno tracejado é mostrado; ao soltar,
+// a tela é cortada/aumentada SEM escalar (mesmo efeito de "Tamanho da tela…"), área nova branca.
+// Shift no canto mantém a proporção.
+Paint.handles = (function () {
+  let preview = null;
+  let drag = null; // { dir, startX, startY, w, h, newW, newH }
+
+  function clampSide(v) {
+    return Math.min(Paint.file.MAX_SIDE, Math.max(1, Math.round(v)));
+  }
+
+  function showPreview(w, h) {
+    const z = Paint.state.zoom;
+    preview.style.width = w * z + 'px';
+    preview.style.height = h * z + 'px';
+    preview.hidden = false;
+    Paint.emit('canvas-drag', { w, h });
+  }
+
+  function onDown(e) {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    Paint.commitTool();
+    // A captura mantém o arraste mesmo com o ponteiro fora da alça. Se falhar, o arraste
+    // ainda funciona enquanto o ponteiro estiver sobre ela, então não deixa o erro interromper.
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+    const { width, height } = Paint.canvas.el;
+    drag = {
+      dir: e.currentTarget.dataset.dir,
+      startX: e.clientX,
+      startY: e.clientY,
+      w: width,
+      h: height,
+      newW: width,
+      newH: height,
+    };
+    showPreview(width, height);
+  }
+
+  function onMove(e) {
+    if (!drag) return;
+    const z = Paint.state.zoom;
+    const dx = (e.clientX - drag.startX) / z;
+    const dy = (e.clientY - drag.startY) / z;
+    let w = drag.dir === 's' ? drag.w : clampSide(drag.w + dx);
+    let h = drag.dir === 'e' ? drag.h : clampSide(drag.h + dy);
+    if (drag.dir === 'se' && e.shiftKey) {
+      // Usa o eixo que mais mudou e calcula o outro pela proporção original.
+      const scale = Math.abs(w / drag.w - 1) >= Math.abs(h / drag.h - 1) ? w / drag.w : h / drag.h;
+      w = clampSide(drag.w * scale);
+      h = clampSide(drag.h * scale);
+    }
+    drag.newW = w;
+    drag.newH = h;
+    showPreview(w, h);
+  }
+
+  function onUp() {
+    if (!drag) return;
+    const { w, h, newW, newH } = drag;
+    drag = null;
+    preview.hidden = true;
+    Paint.emit('canvas-drag', null);
+    if (newW === w && newH === h) return;
+    Paint.history.push();
+    Paint.canvas.setSize(newW, newH, true);
+  }
+
+  function init() {
+    preview = document.getElementById('resize-preview');
+    document.querySelectorAll('.handle').forEach((handle) => {
+      handle.addEventListener('pointerdown', onDown);
+      handle.addEventListener('pointermove', onMove);
+      handle.addEventListener('pointerup', onUp);
+      handle.addEventListener('pointercancel', onUp);
+    });
+  }
+
+  return { init };
+})();
+</script>
+  <script>
+// --- js/ui.js ---
+// Liga a interface (botões, paleta, selects, atalhos, barra de status) ao estado.
+// A UI nunca desenha: ela chama Paint.set / Paint.setTool / ações e reage ao evento 'change'.
+Paint.ui = (function () {
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+
+  // Paleta clássica de 28 cores do Paint (2 linhas × 14).
+  const PALETTE = [
+    '#000000', '#808080', '#800000', '#808000', '#008000', '#008080', '#000080',
+    '#800080', '#808040', '#004040', '#0080ff', '#004080', '#8000ff', '#804000',
+    '#ffffff', '#c0c0c0', '#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff',
+    '#ff00ff', '#ffff80', '#00ff80', '#80ffff', '#8080ff', '#ff0080', '#ff8040',
+  ];
+
+  // Atalhos de uma tecla para ferramentas (sem ⌘).
+  const TOOL_KEYS = {
+    s: 'select', p: 'pencil', b: 'brush', e: 'eraser', f: 'fill',
+    i: 'picker', t: 'text', l: 'line', r: 'rect', o: 'ellipse',
+  };
+
+  // Zoom: valor livre entre os limites; os botões −/+ e ⌘−/⌘+ pulam entre estes níveis.
+  const ZOOM_MIN = 0.1;
+  const ZOOM_MAX = 16;
+  const ZOOM_STEPS = [0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 6, 8, 12, 16];
+
+  function setZoom(z) {
+    Paint.set('zoom', Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z)));
+  }
+
+  function stepZoom(dir) {
+    const z = Paint.state.zoom;
+    const next = dir > 0
+      ? ZOOM_STEPS.find((s) => s > z + 1e-9)
+      : [...ZOOM_STEPS].reverse().find((s) => s < z - 1e-9);
+    if (next) setZoom(next);
+  }
+
+  const actions = {
+    'new': () => Paint.file.newImage(),
+    'open': () => Paint.file.open(),
+    'save-png': () => Paint.file.save('image/png'),
+    'save-jpeg': () => Paint.file.save('image/jpeg'),
+    'undo': () => Paint.history.undo(),
+    'redo': () => Paint.history.redo(),
+    'cut': () => Paint.file.cut(),
+    'copy': () => Paint.file.copy(),
+    'paste': () => Paint.file.pasteFromClipboard(),
+    'delete': () => Paint.tools.select.deleteSelection(),
+    'select-all': () => Paint.tools.select.selectAll(),
+    'zoom-in': () => stepZoom(1),
+    'zoom-out': () => stepZoom(-1),
+    'zoom-reset': () => setZoom(1),
+    'scale': () => Paint.resize.open(),
+    'resize': () => Paint.file.promptResize(),
+    'clear': () => Paint.file.clear(),
+    'swap-colors': () => {
+      const { primary, secondary } = Paint.state;
+      Paint.set('primary', secondary);
+      Paint.set('secondary', primary);
+    },
+  };
+
+  function bindButtons() {
+    $$('[data-action]').forEach((btn) => {
+      btn.addEventListener('click', () => actions[btn.dataset.action]());
+    });
+    $$('[data-tool]').forEach((btn) => {
+      btn.addEventListener('click', () => Paint.setTool(btn.dataset.tool));
+    });
+  }
+
+  function buildPalette() {
+    const palette = $('#palette');
+    for (const color of PALETTE) {
+      const btn = document.createElement('button');
+      btn.style.background = color;
+      btn.title = `${color} — clique: cor 1, clique direito: cor 2`;
+      btn.addEventListener('click', () => Paint.set('primary', color));
+      btn.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        Paint.set('secondary', color);
+      });
+      palette.appendChild(btn);
+    }
+  }
+
+  // Selects e seletores de cor -> estado. blur() devolve o foco ao documento,
+  // senão as teclas de atalho mudariam a opção do select.
+  function bindInputs() {
+    const bind = (id, key, parse = (v) => v) => {
+      const el = $(id);
+      el.addEventListener('input', () => Paint.set(key, parse(el.value)));
+      el.addEventListener('change', () => el.blur());
+    };
+    bind('#size', 'size', Number);
+    bind('#shape-mode', 'shapeMode');
+    bind('#font-size', 'fontSize', Number);
+    bind('#primary', 'primary');
+    bind('#secondary', 'secondary');
+    bindZoomInput();
+  }
+
+  // O zoom digitado só é aplicado ao confirmar (Enter ou sair do campo), não a cada tecla:
+  // senão digitar "50" passaria por 5%. Valor inválido volta ao zoom atual.
+  function bindZoomInput() {
+    const el = $('#zoom');
+    const show = () => { el.value = Math.round(Paint.state.zoom * 100); };
+    el.addEventListener('change', () => {
+      const percent = parseFloat(el.value);
+      if (percent > 0) setZoom(percent / 100);
+      show();
+    });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') el.blur();
+      if (e.key === 'Escape') {
+        show();
+        el.blur();
+      }
+    });
+  }
+
+  // Pinça no trackpad chega como 'wheel' com ctrlKey. Sem isso, o navegador daria zoom na página toda.
+  function bindPinchZoom() {
+    $('.workspace').addEventListener('wheel', (e) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      setZoom(Paint.state.zoom * Math.exp(-e.deltaY * 0.01));
+    }, { passive: false });
+  }
+
+  function bindKeyboard() {
+    document.addEventListener('keydown', (e) => {
+      if (e.target instanceof Element && e.target.matches('textarea, input, select')) return;
+      if (document.querySelector('dialog[open]')) return; // diálogo modal cuida do próprio teclado
+      const mod = e.metaKey || e.ctrlKey;
+      const key = e.key.toLowerCase();
+
+      if (mod) {
+        if (key === 'v') {
+          Paint.file.onPasteShortcut(); // sem preventDefault: o evento 'paste' precisa acontecer
+          return;
+        }
+        const map = {
+          z: e.shiftKey ? 'redo' : 'undo',
+          y: 'redo',
+          s: 'save-png',
+          o: 'open',
+          c: 'copy',
+          x: 'cut',
+          a: 'select-all',
+          '=': 'zoom-in',
+          '+': 'zoom-in',
+          '-': 'zoom-out',
+          '0': 'zoom-reset',
+        };
+        if (map[key]) {
+          e.preventDefault();
+          actions[map[key]]();
+        }
+        return;
+      }
+
+      if (key === 'delete' || key === 'backspace') {
+        e.preventDefault();
+        actions.delete();
+      } else if (key === 'escape') {
+        Paint.commitTool();
+      } else if (key === 'x') {
+        actions['swap-colors']();
+      } else if (TOOL_KEYS[key]) {
+        Paint.setTool(TOOL_KEYS[key]);
+      }
+    });
+  }
+
+  function updateTitle() {
+    const { dirty, fileName } = Paint.state;
+    document.title = `${dirty ? '• ' : ''}${fileName} — Paint`;
+  }
+
+  function onChange({ key, value }) {
+    switch (key) {
+      case 'tool':
+        $$('[data-tool]').forEach((btn) => btn.classList.toggle('active', btn.dataset.tool === value));
+        break;
+      case 'primary':
+      case 'secondary':
+        $('#' + key).value = value;
+        break;
+      case 'size':
+        $('#size').value = String(value);
+        break;
+      case 'zoom':
+        $('#zoom').value = Math.round(value * 100);
+        $('[data-action="zoom-out"]').disabled = value <= ZOOM_MIN;
+        $('[data-action="zoom-in"]').disabled = value >= ZOOM_MAX;
+        break;
+      case 'shapeMode':
+        $('#shape-mode').value = value;
+        break;
+      case 'fontSize':
+        $('#font-size').value = String(value);
+        break;
+      case 'dirty':
+      case 'fileName':
+        updateTitle();
+        break;
+    }
+  }
+
+  function bindStatus() {
+    const pos = $('#status-pos');
+    const size = $('#status-size');
+    const selection = $('#status-sel');
+    Paint.on('pointer', (p) => {
+      pos.textContent = p ? `${p.x}, ${p.y} px` : '';
+    });
+    Paint.on('resize', ({ width, height }) => {
+      size.textContent = `${width} × ${height} px`;
+    });
+    Paint.on('selection', (s) => {
+      selection.textContent = s ? `Seleção: ${s.w} × ${s.h} px` : '';
+    });
+    Paint.on('canvas-drag', (s) => {
+      selection.textContent = s ? `Nova tela: ${s.w} × ${s.h} px` : '';
+    });
+    Paint.on('history', ({ canUndo, canRedo }) => {
+      $('[data-action="undo"]').disabled = !canUndo;
+      $('[data-action="redo"]').disabled = !canRedo;
+    });
+  }
+
+  function init() {
+    bindButtons();
+    buildPalette();
+    bindInputs();
+    bindKeyboard();
+    bindStatus();
+    bindPinchZoom();
+    Paint.on('change', onChange);
+    for (const [key, value] of Object.entries(Paint.state)) onChange({ key, value });
+
+    // Clicar na área cinza fora da imagem finaliza seleção/texto, como no Paint.
+    $('.workspace').addEventListener('pointerdown', (e) => {
+      if (e.target.classList.contains('workspace')) Paint.commitTool();
+    });
+  }
+
+  return { init };
+})();
+</script>
+  <script>
+// --- js/main.js ---
+// Inicialização. Deve ser o último <script> do index.html.
+// A UI é iniciada antes do canvas para já receber os eventos 'resize' e 'history'.
+Paint.ui.init();
+Paint.file.init();
+Paint.resize.init();
+Paint.canvas.init(800, 600);
+Paint.handles.init();
+Paint.history.clear();
+Paint.setTool('pencil');
+
+window.addEventListener('beforeunload', (e) => {
+  if (!Paint.state.dirty) return;
+  e.preventDefault();
+  e.returnValue = '';
+});
+</script>
+</body>
+</html>

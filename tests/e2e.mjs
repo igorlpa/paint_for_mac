@@ -1,6 +1,8 @@
 // Teste E2E: abre index.html via file:// no Chrome headless (DevTools Protocol, sem dependências)
 // e exercita as ferramentas conferindo pixels.
-// Uso: node tests/e2e.mjs   (requer Node 22+ e Google Chrome em /Applications)
+// Uso: node tests/e2e.mjs                   testa os fontes (index.html)
+//      node tests/e2e.mjs dist/paint.html   testa o arquivo único gerado pelo build
+// Requer Node 22+ e Google Chrome em /Applications.
 // Gera um screenshot.png numa pasta temporária, cujo caminho é impresso no final.
 import { spawn } from 'node:child_process';
 import { writeFileSync, mkdtempSync } from 'node:fs';
@@ -8,7 +10,10 @@ import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
-const page = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'index.html');
+const page = process.argv[2]
+  ? resolve(process.argv[2])
+  : resolve(dirname(fileURLToPath(import.meta.url)), '..', 'index.html');
+console.log('Testando: ' + page);
 const outDir = mkdtempSync(join(tmpdir(), 'paint-e2e-'));
 const chromePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const profile = mkdtempSync(join(outDir, 'profile-'));
