@@ -41,6 +41,10 @@ Este arquivo registra **o que foi decidido e por quê**, para que futuras ediç�
 | 21 | **Interface em português; código e identificadores em inglês; comentários em português** | Pedido do usuário (interface) e convenção de código. |
 | 22 | **Zoom só via CSS** (`image-rendering: pixelated`), com níveis de 100% a 800% | Os pixels reais não mudam. As coordenadas são convertidas em `canvas.js` → `point()`. |
 | 23 | **Teste E2E sem dependências** (`tests/e2e.mjs`, CDP via `WebSocket` nativo do Node) | Mantém o projeto sem `npm install`. O teste é só para desenvolvimento. |
+| 24 | **Dois comandos de tamanho, como no Paint:** "Redimensionar…" (`js/resize.js`) **escala** a imagem; "Tamanho da tela…" (`file.js`) corta ou aumenta a área **sem escalar** | São necessidades diferentes, e o Paint também separa as duas. |
+| 25 | **Diálogo de redimensionar:** porcentagem ou pixels; "Manter proporção" preenche a outra dimensão enquanto você digita; **campo vazio é calculado pela proporção** mesmo com "Manter proporção" desmarcado | Pedido do usuário: informar só uma dimensão e o programa calcular a outra. Trocar a unidade converte os valores digitados. O botão OK fica desabilitado se o resultado passar de `MAX_SIDE` (5000 px). |
+| 26 | **"Suavizar" ao escalar** (`imageSmoothingQuality = 'high'`), ligado por padrão e lembrado entre aberturas | É melhor para fotos. Desligado, usa vizinho mais próximo e mantém pixel art nítida. |
+| 27 | **Diálogos com `<dialog>` nativo** + `showModal()`; os atalhos globais ficam desativados enquanto há `dialog[open]` | Teclado, Esc e foco funcionam de graça. Evita `prompt()` quando há mais de um campo. |
 
 ---
 
@@ -62,7 +66,8 @@ js/tools/picker.js    Conta-gotas (volta à ferramenta anterior)
 js/tools/text.js      Texto via textarea
 js/tools/line.js      Linha (Bresenham; Shift = 45°)
 js/tools/shapes.js    Retângulo e elipse (Shift = quadrado/círculo)
-js/file.js            Paint.file: novo, abrir, salvar, tamanho da tela, limpar, copiar/recortar/colar
+js/file.js            Paint.file: novo, abrir, salvar, tamanho da tela, limpar, copiar/recortar/colar; MAX_SIDE
+js/resize.js          Paint.resize: diálogo "Redimensionar" (open) e scaleImage(w, h, smoothing)
 js/ui.js              Paint.ui: botões, paleta, selects, atalhos de teclado, barra de status, título
 js/main.js            Inicialização (sempre o último)
 tests/e2e.mjs         Teste automático no Chrome headless
@@ -129,7 +134,8 @@ tests/e2e.mjs         Teste automático no Chrome headless
 ## Próximos passos (backlog)
 
 - Polígono, curva, retângulo arredondado.
-- Girar/espelhar imagem e seleção; redimensionar (escalar) a imagem, não só a tela.
+- Girar/espelhar imagem e seleção; redimensionar só a seleção (hoje "Redimensionar" escala a imagem inteira).
+- Inclinar (o "Redimensionar e inclinar" do Paint).
 - Balde com tolerância ajustável.
 - Seleção de forma livre e seleção transparente (ignorar a cor 2 ao mover).
 - Arrastar as bordas da tela para redimensionar.
@@ -146,3 +152,4 @@ Formato: `AAAA-MM-DD — decisão — motivo`.
 - 2026-10-20 — Scripts clássicos + `window.Paint` — ES modules não funcionam em `file://`.
 - 2026-10-20 — Linha (Bresenham) e retângulo (`fillRect`) sem antialias — o `stroke()` deixava cantos cinza e halos no balde.
 - 2026-10-20 — Teste E2E com Chrome headless via CDP, sem dependências npm.
+- 2026-10-20 — Adicionado "Redimensionar…" (escala por % ou px, proporção automática, campo vazio calculado) — pedido do usuário, como no Paint.

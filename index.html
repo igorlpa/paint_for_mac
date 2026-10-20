@@ -26,7 +26,8 @@
       <button data-action="select-all" title="Selecionar tudo (⌘A)">Selecionar tudo</button>
     </div>
     <div class="group">
-      <button data-action="resize" title="Mudar o tamanho da tela">Tamanho da tela…</button>
+      <button data-action="scale" title="Redimensionar (escalar) a imagem por porcentagem ou pixels">Redimensionar…</button>
+      <button data-action="resize" title="Mudar o tamanho da tela sem escalar (corta ou aumenta a área)">Tamanho da tela…</button>
       <button data-action="clear" title="Pintar a imagem toda de branco">Limpar</button>
     </div>
     <label class="group">Zoom
@@ -94,6 +95,31 @@
     </div>
   </main>
 
+  <dialog id="resize-dialog">
+    <form id="resize-form">
+      <h2>Redimensionar imagem</h2>
+      <p class="hint">Tamanho atual: <span id="resize-current"></span></p>
+      <div class="row">
+        <label><input type="radio" name="unit" value="percent" checked> Porcentagem</label>
+        <label><input type="radio" name="unit" value="pixels"> Pixels</label>
+      </div>
+      <label class="field">Horizontal
+        <input type="number" id="resize-w" min="0" step="any"><span class="unit-label"></span>
+      </label>
+      <label class="field">Vertical
+        <input type="number" id="resize-h" min="0" step="any"><span class="unit-label"></span>
+      </label>
+      <label><input type="checkbox" id="resize-keep" checked> Manter proporção</label>
+      <label><input type="checkbox" id="resize-smooth" checked> Suavizar (fotos; desmarque para pixel art)</label>
+      <p class="hint">Deixe um campo vazio para calculá-lo pela proporção da imagem.</p>
+      <p id="resize-result"></p>
+      <div class="actions">
+        <button type="button" id="resize-cancel">Cancelar</button>
+        <button type="submit" id="resize-ok" class="primary">OK</button>
+      </div>
+    </form>
+  </dialog>
+
   <footer class="statusbar">
     <span id="status-pos"></span>
     <span id="status-size"></span>
@@ -115,6 +141,7 @@
   <script src="js/tools/line.js"></script>
   <script src="js/tools/shapes.js"></script>
   <script src="js/file.js"></script>
+  <script src="js/resize.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/main.js"></script>
 </body>

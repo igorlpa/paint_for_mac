@@ -127,6 +127,38 @@ await check('botão de ferramenta ativo', `document.querySelector('[data-tool=br
 await check('PNG gerado', `new Promise(r => Paint.canvas.el.toBlob(b => r(b.type + ':' + (b.size > 100)), 'image/png'))`, 'image/png:true');
 await check('JPEG gerado', `new Promise(r => Paint.canvas.el.toBlob(b => r(b.type), 'image/jpeg', 0.92))`, 'image/jpeg');
 
+// --- Redimensionar (escalar) ---
+await evaluate(`
+  T.val = (id, v) => { const el = document.getElementById(id); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); };
+  T.unit = (u) => { const r = document.querySelector('#resize-form [value=' + u + ']'); r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); };
+  T.keep = (on) => { const c = document.getElementById('resize-keep'); c.checked = on; c.dispatchEvent(new Event('change', { bubbles: true })); };
+  T.fields = () => [document.getElementById('resize-w').value, document.getElementById('resize-h').value];
+  // Imagem conhecida: metade esquerda vermelha, direita azul.
+  Paint.set('dirty', false); Paint.file.newImage();
+  const c = Paint.canvas.ctx; c.fillStyle = '#ff0000'; c.fillRect(0, 0, 400, 600); c.fillStyle = '#0000ff'; c.fillRect(400, 0, 400, 600);
+  true`);
+await check('redimensionar: abre em 100%', `document.querySelector('[data-action=scale]').click();
+  [document.getElementById('resize-dialog').open, ...T.fields(), document.getElementById('resize-result').textContent]`,
+  [true, '100', '100', 'Resultado: 800 × 600 px']);
+await check('trocar para pixels converte valores', `T.unit('pixels'); T.fields()`, ['800', '600']);
+await check('pixels: só largura -> altura proporcional', `T.val('resize-w', 400); T.fields()`, ['400', '300']);
+await check('aplicar escala a imagem', `document.getElementById('resize-form').requestSubmit();
+  [document.getElementById('resize-dialog').open, Paint.canvas.el.width, Paint.canvas.el.height, T.px(100,150), T.px(300,150)]`,
+  [false, 400, 300, '#ff0000', '#0000ff']);
+await check('desfazer volta ao tamanho original', `Paint.history.undo(); [Paint.canvas.el.width, Paint.canvas.el.height, T.px(700,10)]`, [800, 600, '#0000ff']);
+await check('porcentagem: só vertical (sem proporção) calcula a outra', `Paint.resize.open(); T.keep(false); T.val('resize-w', ''); T.val('resize-h', 50);
+  document.getElementById('resize-result').textContent`, 'Resultado: 400 × 300 px');
+await check('sem proporção: dimensões independentes', `T.val('resize-w', 200); T.val('resize-h', 50); document.getElementById('resize-result').textContent`, 'Resultado: 1600 × 300 px');
+await check('acima do limite desabilita OK', `T.val('resize-w', 1000); document.getElementById('resize-ok').disabled`, true);
+await check('sem suavização mantém cores puras', `T.keep(true); T.val('resize-w', 300);
+  document.getElementById('resize-smooth').checked = false; document.getElementById('resize-form').requestSubmit();
+  [Paint.canvas.el.width, Paint.canvas.el.height, T.px(1199,0), T.px(1200,0)]`, [2400, 1800, '#ff0000', '#0000ff']);
+await evaluate(`Paint.history.undo(); Paint.resize.open(); T.unit('pixels'); T.val('resize-w', 640); true`);
+await sleep(200);
+const dialogShot = await send('Page.captureScreenshot', { format: 'png' });
+writeFileSync(join(outDir, 'resize-dialog.png'), Buffer.from(dialogShot.result.data, 'base64'));
+await evaluate(`document.getElementById('resize-dialog').close(); true`);
+
 // Screenshot com um desenho de exemplo para inspeção visual.
 await evaluate(`Paint.set('dirty', false); Paint.file.newImage(); true`);
 await evaluate(`Paint.set('shapeMode','both'); Paint.set('size',3); Paint.set('primary','#000080'); Paint.set('secondary','#ffff80');

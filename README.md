@@ -15,6 +15,7 @@ Roda no navegador: **sem instalação, sem loja e sem build.**
 - **Desfazer/refazer:** até 30 passos.
 - **Área de transferência:** copiar, recortar, colar (inclusive prints do macOS) e excluir.
 - **Arquivo:** abrir imagem, salvar em PNG ou JPEG e mudar o tamanho da tela.
+- **Redimensionar:** escala a imagem por porcentagem ou pixels. Com "Manter proporção", basta informar uma dimensão e a outra é calculada.
 - **Exibição:** zoom de 100% a 800%.
 
 ## Atalhos

@@ -30,6 +30,7 @@ Paint.ui = (function () {
     'paste': () => Paint.file.pasteFromClipboard(),
     'delete': () => Paint.tools.select.deleteSelection(),
     'select-all': () => Paint.tools.select.selectAll(),
+    'scale': () => Paint.resize.open(),
     'resize': () => Paint.file.promptResize(),
     'clear': () => Paint.file.clear(),
     'swap-colors': () => {
@@ -82,6 +83,7 @@ Paint.ui = (function () {
   function bindKeyboard() {
     document.addEventListener('keydown', (e) => {
       if (e.target instanceof Element && e.target.matches('textarea, input, select')) return;
+      if (document.querySelector('dialog[open]')) return; // diálogo modal cuida do próprio teclado
       const mod = e.metaKey || e.ctrlKey;
       const key = e.key.toLowerCase();
 

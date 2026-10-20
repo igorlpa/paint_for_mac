@@ -211,6 +211,7 @@ Paint.file = (function () {
   }
 
   return {
+    MAX_SIDE,
     init,
     newImage,
     open,
